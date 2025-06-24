@@ -43,7 +43,7 @@ ROOT_URLCONF = 'InternalCMS.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [ BASE_DIR / 'templates' ],  # ← اضيف هذا السطر هنا
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

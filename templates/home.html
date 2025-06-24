@@ -1,0 +1,49 @@
+<!-- home.html -->
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Internal CMS - Dashboard</title>
+</head>
+<body style="margin: 0; font-family: Arial, sans-serif; background-color: #F2F2F2;">
+
+    {% include 'header.html' %}
+
+    <!-- Main Content Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 2fr; grid-template-rows: auto 1fr; gap: 20px; padding: 20px; box-sizing: border-box;">
+        
+        <!-- Tasks Column -->
+        <div style="grid-row: 1 / span 2; background-color: #C6E5EA; padding: 15px; border-radius: 8px;">
+            <h2 style="background: white; display: inline-block; padding: 5px 10px; border-radius: 4px; color: #054159;">✅ Tasks</h2>
+            <p>عدد المهام: 24</p>
+        </div>
+
+        <!-- Files Box -->
+        <div style="background-color: #C6E5EA; padding: 15px; border-radius: 8px;">
+            <h2 style="background: white; display: inline-block; padding: 5px 10px; border-radius: 4px; color: #054159;">📁 Files</h2>
+            <p>عدد الملفات: 37</p>
+        </div>
+
+        <!-- Clients Box -->
+        <div style="background-color: #C6E5EA; padding: 15px; border-radius: 8px;">
+            <h2 style="background: white; display: inline-block; padding: 5px 10px; border-radius: 4px; color: #054159;">👥 Clients</h2>
+            <p>عدد العملاء: 12</p>
+        </div>
+
+    </div>
+
+    {% include 'footer.html' %}
+
+    <!-- Responsive Grid for Small Screens -->
+    <style>
+        @media (max-width: 768px) {
+            div[style*="display: grid"] {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+        }
+    </style>
+
+</body>
+</html>
