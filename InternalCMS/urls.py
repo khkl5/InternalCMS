@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.http import HttpResponse
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -14,6 +14,6 @@ urlpatterns = [
     # روابط الـ API
     path('api/', include('content.urls')),
 
-    # الصفحة الرئيسية (مؤقتاً)
-    path('', lambda request: HttpResponse("🎉 أهلاً بك في InternalCMS — لوحة الإدارة"), name='home'),
+    # الصفحة الرئيسية → تعرض home.html
+    path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]

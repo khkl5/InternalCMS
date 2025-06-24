@@ -1,0 +1,51 @@
+<!-- header.html -->
+<header style="background-color: #054159; color: white; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; position: relative;">
+    <div style="font-size: 20px; font-weight: bold;">📂 Internal CMS</div>
+    <button id="menuToggle" style="background-color: transparent; border: none; color: white; font-size: 24px; cursor: pointer;">☰</button>
+</header>
+
+<!-- User Info -->
+<div style="background-color: #08748C; color: white; padding: 10px 20px; font-size: 16px;">
+    أهلاً: <span style="font-weight: bold;">{{ user.username }}</span>  
+    ({{ user.role }})
+</div>
+
+<nav id="mainMenu" style="background-color: #08748C;">
+    <div id="menuItems" class="show" style="display: flex; flex-wrap: wrap; justify-content: center;">
+        <a href="home.html" style="padding: 15px; color: white; text-decoration: none;">🏠 Dashboard</a>
+        <a href="#" style="padding: 15px; color: white; text-decoration: none;">👥 Clients</a>
+        <a href="#" style="padding: 15px; color: white; text-decoration: none;">✅ Tasks</a>
+        <a href="#" style="padding: 15px; color: white; text-decoration: none;">📁 Content</a>
+        <a href="#" style="padding: 15px; color: white; text-decoration: none;">📊 Reports</a>
+    </div>
+</nav>
+
+<style>
+    #menuItems {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    #menuItems.hide {
+        display: none !important;
+    }
+
+    @media (max-width: 768px) {
+        #menuItems {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.getElementById('menuToggle');
+        const menuItems = document.getElementById('menuItems');
+
+        menuToggle.addEventListener('click', function() {
+            menuItems.classList.toggle('hide');
+        });
+    });
+</script>
