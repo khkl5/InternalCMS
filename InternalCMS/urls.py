@@ -11,6 +11,9 @@ urlpatterns = [
     path('tasks/', include('tasks.urls')),
     path('clients/', include('clients.urls')),
 
+    # روابط الـ API
+    path('api/', include('content.urls')),
+
     # الصفحة الرئيسية (مؤقتاً)
     path('', lambda request: HttpResponse("🎉 أهلاً بك في InternalCMS — لوحة الإدارة"), name='home'),
 ]

@@ -1,14 +1,18 @@
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# تحميل .env
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'django-insecure-_8wmso*4+&qq%bo7^ei)ld6he#0v7$2szywc9%m22r!!sidz^n'
 
-DEBUG = True
+# أمان
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", 'fallback-secret-if-missing')
+DEBUG = os.getenv("DEBUG", "True") == "True"
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
-ALLOWED_HOSTS = []
-
-
-
+# إعدادات Apps
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -53,14 +57,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'InternalCMS.wsgi.application'
 
+# قاعدة البيانات
+DATABASE_URL = os.getenv("DATABASE_URL", "")
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DATABASE_URL:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
+# المصادقة
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -76,16 +89,24 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+# اللغات والتوقيت
 LANGUAGE_CODE = 'ar'
-
 TIME_ZONE = 'Asia/Riyadh'
-
 USE_I18N = True
-
 USE_TZ = True
 
+# الملفات الثابتة Static files
+STATIC_URL = '/static/'
 
-STATIC_URL = 'static/'
+# رفع ملفات media (لو حبيتي تخزين محلي)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
+# حقول افتراضية
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# إعدادات Supabase
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
+SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "media")
