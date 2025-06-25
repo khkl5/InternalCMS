@@ -8,8 +8,9 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #F2F2F2;
-            color: #054159;
+            background-color: #F4EFEB; /* خلفية عامة */
+            color: #2F4157;
+            padding-top: 50px; /* لأن الهيدر ثابت */
         }
 
         .grid {
@@ -24,20 +25,27 @@
         }
 
         .box {
-            background-color: #C6E5EA;
+            background-color: #C7D9E5;
             padding: 15px;
             border-radius: 8px;
             direction: rtl;
             text-align: right;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .box:hover {
+            background-color: #577C8E;
+            color: #FFFFFF;
         }
 
         .box h2 {
-            background: white;
+            background: none;
             display: inline-block;
             padding: 5px 10px;
             border-radius: 4px;
-            color: #054159;
-            text-align: left; /* العنوان نفسه يكون عاليسار */
+            color: inherit;
+            text-align: left;
         }
 
         @media (max-width: 768px) {
@@ -85,12 +93,10 @@
             const { data: { session } } = await supabase.auth.getSession();
 
             if (!session) {
-                // المستخدم غير مسجل دخول → تحويل إلى login
                 window.location.href = '/login/';
             }
         }
 
-        // تحقق عند تحميل الصفحة
         checkAuth();
     </script>
 
