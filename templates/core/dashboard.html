@@ -9,12 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        body {
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
             font-family: 'Tajawal', sans-serif;
             background-color: #F4EFEB;
             color: #2F4157;
             margin: 0;
             padding: 0;
+            padding-top: 60px;
         }
 
         .main-content {
@@ -62,10 +65,15 @@
             font-weight: bold;
         }
 
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
         .table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
             background: #fff;
             border-radius: 12px;
             overflow: hidden;
@@ -76,6 +84,7 @@
             padding: 14px;
             border-bottom: 1px solid #eee;
             text-align: center;
+            white-space: nowrap;
         }
 
         .table th {
@@ -100,16 +109,53 @@
             border: 1px solid #ccc;
         }
 
+        /* responsive styles for mobile */
         @media (max-width: 768px) {
+
             .main-content {
                 margin-right: 0;
-                padding-top: 100px;
+                padding: 14px;
+                padding-top: 80px;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+                margin-bottom: 14px;
+                padding: 0 10px;
+            }
+
+            .cards-grid {
+                gap: 12px;
+                padding: 0 10px;
+            }
+
+            .card {
+                padding: 14px;
+                border-radius: 12px;
+            }
+
+            .card h5 {
+                font-size: 1rem;
+                margin-bottom: 6px;
+            }
+
+            .card p {
+                font-size: 1.4rem;
+            }
+
+            .table th, .table td {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .dropdown-menu {
+                right: 10px;
             }
         }
     </style>
 </head>
 
-<body style="padding-top: 60px;">
+<body>
 
     {% include 'header.html' %}
     {% include 'core/sidebar.html' %}
@@ -118,46 +164,48 @@
 
         <h2 class="section-title">أحدث المهام</h2>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>م</th>
-                    <th>عنوان المهمة</th>
-                    <th>تاريخ التسليم</th>
-                    <th>الحالة</th>
-                    <th>إجراءات</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for task in latest_tasks %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ task.title }}</td>
-                    <td>{{ task.due_date }}</td>
-                    <td>
-                        {% if task.status == 'pending' %}
-                            <span class="badge badge-warning">معلقة</span>
-                        {% elif task.status == 'completed' %}
-                            <span class="badge badge-success">مكتملة</span>
-                        {% elif task.status == 'overdue' %}
-                            <span class="badge badge-danger">متأخرة</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <select class="form-select update-status" data-task-id="{{ task.id }}">
-                            <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>معلقة</option>
-                            <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>مكتملة</option>
-                            <option value="overdue" {% if task.status == 'overdue' %}selected{% endif %}>متأخرة</option>
-                        </select>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5">لا توجد مهام حالياً.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>م</th>
+                        <th>عنوان المهمة</th>
+                        <th>تاريخ التسليم</th>
+                        <th>الحالة</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in latest_tasks %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.due_date }}</td>
+                        <td>
+                            {% if task.status == 'pending' %}
+                                <span class="badge badge-warning">معلقة</span>
+                            {% elif task.status == 'completed' %}
+                                <span class="badge badge-success">مكتملة</span>
+                            {% elif task.status == 'overdue' %}
+                                <span class="badge badge-danger">متأخرة</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <select class="form-select update-status" data-task-id="{{ task.id }}">
+                                <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>معلقة</option>
+                                <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>مكتملة</option>
+                                <option value="overdue" {% if task.status == 'overdue' %}selected{% endif %}>متأخرة</option>
+                            </select>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">لا توجد مهام حالياً.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
         <h2 class="section-title">الإحصائيات</h2>
 
