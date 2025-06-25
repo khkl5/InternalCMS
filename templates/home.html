@@ -1,33 +1,74 @@
-<!-- home.html -->
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Internal CMS - Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #F2F2F2;
+            color: #054159;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            grid-template-rows: auto 1fr;
+            gap: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .box {
+            background-color: #C6E5EA;
+            padding: 15px;
+            border-radius: 8px;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .box h2 {
+            background: white;
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            color: #054159;
+            text-align: left; /* العنوان نفسه يكون عاليسار */
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+        }
+    </style>
 </head>
-<body style="margin: 0; font-family: Arial, sans-serif; background-color: #F2F2F2;">
+<body>
 
     {% include 'header.html' %}
 
-    <!-- Main Content Grid -->
-    <div style="display: grid; grid-template-columns: 1fr 2fr; grid-template-rows: auto 1fr; gap: 20px; padding: 20px; box-sizing: border-box;">
-        
+    <div class="grid">
+
         <!-- Tasks Column -->
-        <div style="grid-row: 1 / span 2; background-color: #C6E5EA; padding: 15px; border-radius: 8px;">
-            <h2 style="background: white; display: inline-block; padding: 5px 10px; border-radius: 4px; color: #054159;">✅ Tasks</h2>
+        <div class="box" style="grid-row: 1 / span 2;">
+            <h2>✅ Tasks</h2>
             <p>عدد المهام: 24</p>
         </div>
 
         <!-- Files Box -->
-        <div style="background-color: #C6E5EA; padding: 15px; border-radius: 8px;">
-            <h2 style="background: white; display: inline-block; padding: 5px 10px; border-radius: 4px; color: #054159;">📁 Files</h2>
+        <div class="box">
+            <h2>📁 Files</h2>
             <p>عدد الملفات: 37</p>
         </div>
 
         <!-- Clients Box -->
-        <div style="background-color: #C6E5EA; padding: 15px; border-radius: 8px;">
-            <h2 style="background: white; display: inline-block; padding: 5px 10px; border-radius: 4px; color: #054159;">👥 Clients</h2>
+        <div class="box">
+            <h2>👥 Clients</h2>
             <p>عدد العملاء: 12</p>
         </div>
 
@@ -35,15 +76,23 @@
 
     {% include 'footer.html' %}
 
-    <!-- Responsive Grid for Small Screens -->
-    <style>
-        @media (max-width: 768px) {
-            div[style*="display: grid"] {
-                display: flex !important;
-                flex-direction: column !important;
+    <!-- Supabase Session Check -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script>
+        const supabase = supabase.createClient('https://xxx.supabase.co', 'public-anon-key');
+
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session) {
+                // المستخدم غير مسجل دخول → تحويل إلى login
+                window.location.href = '/login/';
             }
         }
-    </style>
+
+        // تحقق عند تحميل الصفحة
+        checkAuth();
+    </script>
 
 </body>
 </html>
