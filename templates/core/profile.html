@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ملفي الشخصي</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #F2F2F2;
+            color: #054159;
+            padding: 20px;
+        }
+
+        .profile-card {
+            background-color: #C6E5EA;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .profile-card h2 {
+            color: #054159;
+            margin-bottom: 15px;
+        }
+
+        .profile-card p {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'header.html' %}
+
+    <div class="profile-card">
+        <h2>الملف الشخصي</h2>
+        <p id="profile-email">البريد الإلكتروني: ...</p>
+        <p id="profile-role">الدور: ...</p>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <!-- Supabase Session Check -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script>
+        const supabase = supabase.createClient('https://xxx.supabase.co', 'public-anon-key');
+
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session) {
+                window.location.href = '/login/';
+            } else {
+                // جلب بيانات المستخدم
+                const user = session.user;
+                document.getElementById('profile-email').textContent = 'البريد الإلكتروني: ' + user.email;
+                // لاحقًا ممكن تجيب الدور (role) من UserProfile لو عندك
+                document.getElementById('profile-role').textContent = 'الدور: قيد التحميل...';
+            }
+        }
+
+        checkAuth();
+    </script>
+
+</body>
+</html>
