@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}لوحة التحكم{% endblock %}
+{% block title %}قائمة المهام{% endblock %}
 
 {% block content %}
 
-<h2 class="section-title">أحدث المهام</h2>
+<h2 class="section-title">جميع المهام</h2>
 
 <div class="table-responsive">
     <table class="table">
@@ -18,7 +18,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for task in latest_tasks %}
+            {% for task in all_tasks %}
             <tr>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ task.title }}</td>
@@ -42,38 +42,14 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="5">لا توجد مهام حالياً.</td>
+                <td colspan="5">لا توجد مهام.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
 
-<h2 class="section-title">الإحصائيات</h2>
-
-<div class="cards-grid">
-    <div class="card">
-        <h5>عدد العملاء</h5>
-        <p>{{ total_clients|default:"0" }}</p>
-    </div>
-
-    <div class="card">
-        <h5>عدد المهام</h5>
-        <p>{{ total_tasks|default:"0" }}</p>
-    </div>
-
-    <div class="card">
-        <h5>المهام المعلقة</h5>
-        <p>{{ tasks_pending|default:"0" }}</p>
-    </div>
-
-    <div class="card">
-        <h5>عدد المستندات</h5>
-        <p>{{ total_documents|default:"0" }}</p>
-    </div>
-</div>
-
-<!-- ✅ JavaScript لتحديث الحالة -->
+<!-- ✅ JS لتحديث الحالة -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.update-status').forEach(function (select) {
@@ -92,14 +68,13 @@
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            alert("✅ تم تحديث حالة المهمة بنجاح");
-            // location.reload(); // لو تبين تحدثي الصفحة بعد التعديل
+            alert("✅ تم تحديث حالة المهمة");
           } else {
             alert("❌ خطأ: " + (data.error || "تعذر التحديث"));
           }
         })
         .catch(err => {
-          alert("❌ خطأ في الاتصال بالخادم");
+          alert("❌ خطأ في الاتصال");
           console.error(err);
         });
       });
