@@ -58,12 +58,18 @@ TEMPLATES = [
 WSGI_APPLICATION = 'InternalCMS.wsgi.application'
 
 # قاعدة البيانات
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+USE_POSTGRES = os.getenv("USE_POSTGRES", "False") == "True"
 
-if DATABASE_URL:
-    import dj_database_url
+if USE_POSTGRES:
     DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL)
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv("DB_NAME"),
+            'USER': os.getenv("DB_USER"),
+            'PASSWORD': os.getenv("DB_PASSWORD"),
+            'HOST': os.getenv("DB_HOST"),
+            'PORT': os.getenv("DB_PORT", "5432"),
+        }
     }
 else:
     DATABASES = {
@@ -72,7 +78,6 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-
 # المصادقة
 AUTH_PASSWORD_VALIDATORS = [
     {
