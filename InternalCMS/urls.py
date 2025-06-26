@@ -1,16 +1,15 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    # لوحة الإدارة
     path('admin/', admin.site.urls),
-
-    # روابط التطبيقات
-    path('', include('core.urls')),          # الصفحة الرئيسية = dashboard
+    path('', include('core.urls')),
     path('content/', include('content.urls')),
     path('tasks/', include('tasks.urls')),
     path('clients/', include('clients.urls')),
-
-    # لو عندك api:
-    # path('api/', include('content.api_urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
