@@ -50,33 +50,131 @@
 </div>
 
 <h2 class="section-title">الإحصائيات</h2>
+<style>
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 20px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+    border: 1px solid #eee;
+    cursor: pointer;
+  }
+
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .card svg {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0.5rem;
+    transition: fill 0.3s;
+  }
+
+  .card:nth-child(1) svg,
+  .card:nth-child(2) svg,
+  .card:nth-child(3) svg,
+  .card:nth-child(4) svg {
+    fill: #054b63;
+  }
+
+  .card h5 {
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+    color: #333;
+    transition: color 0.3s;
+  }
+
+  .card p {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #054b63;
+    margin: 0;
+    transition: color 0.3s;
+  }
+
+  /* ✅ تحديد الكرت */
+  .card.selected {
+    background-color: #e8f4fb;
+    border-color: #054b63;
+  }
+
+  .card.selected svg {
+    fill: #0077a6 !important;
+  }
+
+  .card.selected h5,
+  .card.selected p {
+    color: #0077a6 !important;
+  }
+</style>
+
 
 <div class="cards-grid">
-    <div class="card">
-        <h5>عدد العملاء</h5>
-        <p>{{ total_clients|default:"0" }}</p>
-    </div>
+  <div class="card">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05C16.43 14.01 19 15.05 19 16.5V19h5v-2.5c0-2.33-4.67-3.5-6-3.5z"/>
+    </svg>
+    <h5>عدد العملاء</h5>
+    <p>{{ total_clients|default:"0" }}</p>
+  </div>
 
-    <div class="card">
-        <h5>عدد المهام</h5>
-        <p>{{ total_tasks|default:"0" }}</p>
-    </div>
+  <div class="card">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h12v2H3v-2z"/>
+    </svg>
+    <h5>عدد المهام</h5>
+    <p>{{ total_tasks|default:"0" }}</p>
+  </div>
 
-    <div class="card">
-        <h5>المهام المعلقة</h5>
-        <p>{{ tasks_pending|default:"0" }}</p>
-    </div>
+  <div class="card">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 
+      10-10S17.52 2 12 2zm.5 5h-1v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
+    </svg>
+    <h5>المهام المعلقة</h5>
+    <p>{{ tasks_pending|default:"0" }}</p>
+  </div>
 
-    <div class="card">
-        <h5>عدد المستندات</h5>
-        <p>{{ total_documents|default:"0" }}</p>
-    </div>
+  <div class="card">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 
+      2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm1 
+      7V3.5L18.5 9H15z"/>
+    </svg>
+    <h5>عدد المستندات</h5>
+    <p>{{ total_documents|default:"0" }}</p>
+  </div>
 </div>
 
 <!-- ✅ JavaScript لتحديث الحالة -->
+<!-- ✅ JavaScript لتفعيل اختيار الكرت -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.update-status').forEach(function (select) {
+    const cards = document.querySelectorAll('.cards-grid .card');
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        // إزالة التحديد من كل الكروت
+        cards.forEach(c => c.classList.remove('selected'));
+        // إضافة التحديد للكرت الحالي
+        card.classList.add('selected');
+      });
+    });
+
+    // تحديث الحالة للمهمات
+    const selects = document.querySelectorAll('.update-status');
+    selects.forEach(select => {
       select.addEventListener('change', function () {
         const taskId = this.dataset.taskId;
         const newStatus = this.value;
@@ -93,18 +191,18 @@
         .then(data => {
           if (data.success) {
             alert("✅ تم تحديث حالة المهمة بنجاح");
-            // location.reload(); // لو تبين تحدثي الصفحة بعد التعديل
           } else {
-            alert("❌ خطأ: " + (data.error || "تعذر التحديث"));
+            alert("❌ فشل التحديث: " + (data.error || "حدث خطأ غير متوقع"));
           }
         })
-        .catch(err => {
+        .catch(error => {
           alert("❌ خطأ في الاتصال بالخادم");
-          console.error(err);
+          console.error("Fetch error:", error);
         });
       });
     });
   });
 </script>
+
 
 {% endblock %}

@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from django.contrib.messages import constants as messages
 
 # تحميل .env
 load_dotenv()
@@ -102,6 +103,8 @@ USE_TZ = True
 
 # الملفات الثابتة Static files
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [ BASE_DIR / "static" ]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # رفع ملفات media (لو حبيتي تخزين محلي)
 MEDIA_URL = '/media/'
@@ -115,3 +118,11 @@ SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "media")
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'debug',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'error',
+}
