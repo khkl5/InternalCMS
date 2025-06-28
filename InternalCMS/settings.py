@@ -40,6 +40,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'InternalCMS.urls'
+LOGIN_URL = 'login'
 
 TEMPLATES = [
     {
