@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+  <h2>📊 لوحة المدير</h2>
+  <div class="stats">
+    <div class="card">👤 عدد المستخدمين: {{ total_users }}</div>
+    <div class="card">🧑‍💼 عدد الموظفين: {{ total_staff }}</div>
+    <div class="card">📋 المهام: {{ total_tasks }}</div>
+    <div class="card">📁 الملفات: {{ total_documents }}</div>
+    <div class="card">👥 العملاء: {{ total_clients }}</div>
+  </div>
+
+  <div class="links">
+    <a href="{% url 'client_list' %}">🔗 إدارة العملاء</a>
+    <a href="{% url 'task_list' %}">🔗 إدارة المهام</a>
+    <a href="#">🔗 إدارة الملفات</a>
+    <a href="/admin/auth/user/">🔗 إدارة المستخدمين</a>
+  </div>
+</div>
+
+<style>
+.dashboard {
+    padding: 30px;
+    font-family: 'Tajawal', sans-serif;
+}
+.stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin: 20px 0;
+}
+.card {
+    background: #C6E5EA;
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 16px;
+    min-width: 150px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.links a {
+    display: inline-block;
+    margin: 10px 10px 0 0;
+    background: #08748C;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+.links a:hover {
+    background: #054159;
+}
+</style>
+{% endblock %}

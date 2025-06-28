@@ -1,15 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
+from .role import Role  # استيراد الدور الجديد
 
 class UserProfile(models.Model):
-    ROLE_CHOICES = [
-        ('admin', 'مدير نظام'),
-        ('staff', 'موظف'),
-        ('viewer', 'قارئ فقط'),
-    ]
-
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='staff')
+    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)
     phone_number = models.CharField(max_length=20, blank=True)
     department = models.CharField(max_length=100, blank=True)
 
