@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
 
+
 def dashboard_view(request):
     if not request.user.is_authenticated:
         return redirect('login')
@@ -107,6 +108,14 @@ def logout_view(request):
 def settings_view(request):
     return HttpResponse("صفحة الإعدادات")
 
+@login_required
+def user_list_view(request):
+    return HttpResponse("قائمة المستخدمين")
+@role_required(['admin'])
+@login_required
+def settings_view(request):
+    return HttpResponse("صفحة الإعدادات")
+@role_required(['admin', 'staff'])
 @login_required
 def user_list_view(request):
     return HttpResponse("قائمة المستخدمين")
