@@ -6,6 +6,10 @@ from tasks.models import Task
 from content.models import Document
 from .models import UserProfile
 from core.decorators import role_required
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 
 
 def dashboard_view(request):
@@ -92,3 +96,17 @@ def profile_view(request):
 
 def reports_view(request):
     return render(request, 'content/reports.html')
+
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+@login_required
+def settings_view(request):
+    return HttpResponse("صفحة الإعدادات")
+
+@login_required
+def user_list_view(request):
+    return HttpResponse("قائمة المستخدمين")
