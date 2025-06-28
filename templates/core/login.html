@@ -19,9 +19,10 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             text-align: right;
+            width: 300px;
         }
 
-        input[type="email"],
+        input[type="text"],
         input[type="password"] {
             width: 100%;
             padding: 10px;
@@ -38,15 +39,16 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
+            width: 100%;
         }
 
         button[type="submit"]:hover {
             background-color: #054159;
         }
 
-        #login-error {
+        .error-message {
             color: red;
-            margin-top: 15px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -56,43 +58,24 @@
 
     <h2>تسجيل الدخول</h2>
 
-    <form id="login-form">
-        <label for="email">البريد الإلكتروني:</label>
-        <input type="email" id="email" name="email" required>
+    <form method="post" action="">
+        {% csrf_token %}
+        <label for="username">اسم المستخدم:</label>
+        <input type="text" id="username" name="username" required>
 
         <label for="password">كلمة المرور:</label>
         <input type="password" id="password" name="password" required>
 
         <button type="submit">دخول</button>
+
+        {% if messages %}
+            {% for message in messages %}
+                <p class="error-message">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
     </form>
 
-    <p id="login-error"></p>
-
     {% include 'footer.html' %}
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    <script>
-        const supabase = supabase.createClient('https://xxx.supabase.co', 'public-anon-key');
-
-        document.getElementById('login-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
-
-            if (error) {
-                document.getElementById('login-error').textContent = error.message;
-            } else {
-                // نجاح — توجهي المستخدم للملف الشخصي
-                window.location.href = '/profile/';
-            }
-        });
-    </script>
 
 </body>
 </html>
