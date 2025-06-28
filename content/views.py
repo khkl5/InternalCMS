@@ -3,21 +3,18 @@ from .models import Document
 from .serializers import DocumentSerializer
 
 class DocumentViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Document.objects.all().order_by('-created_at')
     serializer_class = DocumentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
+        role = getattr(user.userprofile.role, 'name', None)
 
-        if user.is_superuser:
+        if role == 'admin':
             return Document.objects.all()
 
-        # لو فيه صلاحيات... هنا فين تحددين:
-        # مدير النظام يشوف الكل
-        # موظف يشوف حسب client
-        # قارئ فقط يشوف حسب access_level
+        if role == 'staff':
+            return Document.objects.filter(uploaded_by=user)
 
-        return Document.objects.filter(
-            access_level__in=['public', 'restricted']
-        )
+        # افتراضيًا للمشاهدين وغيرهم
+        return Document.objects.filter(access_level__in=['public', 'restricted'])
