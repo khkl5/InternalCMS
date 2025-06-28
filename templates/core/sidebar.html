@@ -1,70 +1,86 @@
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-
-<!-- sidebar.html -->
 <aside class="sidebar">
     <nav>
-        <a href="{% url 'dashboard' %}">
-            <svg class="nav-icon" viewBox="0 0 24 24">
-                <path d="M3 13h8V3H3v10zm10 8h8v-6h-8v6zM3 21h8v-6H3v6zm10-8h8V3h-8v10z"></path>
-            </svg>
-            لوحة التحكم
-        </a>
-
         {% if request.user.userprofile.role.name == 'admin' %}
-        <a href="{% url 'admin_dashboard' %}">
-            <svg class="nav-icon" viewBox="0 0 24 24">
-                <path d="M3 13h8V3H3v10zm10 8h8v-6h-8v6zM3 21h8v-6H3v6zm10-8h8V3h-8v10z"></path>
-            </svg>
-            لوحة المدير
-        </a>
+            <a href="{% url 'admin_dashboard' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M3 13h8V3H3v10zm10 8h8v-6h-8v6zM3 21h8v-6H3v6zm10-8h8V3h-8v10z"></path>
+                </svg>
+                لوحة المدير
+            </a>
+            <a href="{% url 'client_list' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="..."></path>
+                </svg>
+                العملاء
+            </a>
+            <a href="{% url 'task_list' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="..."></path>
+                </svg>
+                المهام
+            </a>
+            <a href="{% url 'reports' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="..."></path>
+                </svg>
+                التقارير
+            </a>
+        
+        {% elif request.user.userprofile.role.name == 'staff' %}
+            <a href="{% url 'staff_dashboard' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="..."></path>
+                </svg>
+                لوحة الموظف
+            </a>
+            <a href="{% url 'client_list' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="..."></path>
+                </svg>
+                عملائي
+            </a>
+            <a href="{% url 'task_list' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="..."></path>
+                </svg>
+                المهام
+            </a>
+        
+        {% elif request.user.userprofile.role.name == 'viewer' %}
+            <a href="{% url 'viewer_dashboard' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="..."></path>
+                </svg>
+                لوحة المتابعة
+            </a>
+            <a href="{% url 'documents:list' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="..."></path>
+                </svg>
+                الملفات
+            </a>
         {% endif %}
-
-        <a href="{% url 'client_list' %}">
-            <svg class="nav-icon" viewBox="0 0 24 24">
-                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C14 14.17 9.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"></path>
-            </svg>
-            العملاء
-        </a>
-
-        <a href="{% url 'task_list' %}">
-            <svg class="nav-icon" viewBox="0 0 24 24">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"></path>
-            </svg>
-            المهام
-        </a>
-
-        <a href="#">
-            <svg class="nav-icon" viewBox="0 0 24 24">
-                <path d="M4 6h16v2H4zm0 6h16v2H4zm0 6h16v2H4z"></path>
-            </svg>
-            المحتوى
-        </a>
-
-        <a href="{% url 'reports' %}">
-            <svg class="nav-icon" viewBox="0 0 24 24">
-                <path d="M12 4.14c-4.8 0-8.73 3.82-8.97 8.57-.01.22.16.43.39.43h1.9c.24 0 .44-.19.45-.43C6.2 9.03 8.85 6.43 12 6.43s5.8 2.6 5.83 6.28c.01.24.21.43.45.43h1.9c.23 0 .41-.21.39-.43-.24-4.75-4.17-8.57-8.97-8.57z"></path>
-            </svg>
-            التقارير
-        </a>
 
         <hr>
 
         <a href="{% url 'profile' %}">
             <svg class="nav-icon" viewBox="0 0 24 24">
-                <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"></path>
+                <path d="..."></path>
             </svg>
             حسابي
         </a>
 
-        <a href="#" class="logout">
+        <a href="{% url 'logout' %}" class="logout">
             <svg class="nav-icon" viewBox="0 0 24 24">
-                <path d="M16 13v-2H7v2h9zm3-6V5h-6v2h6zm0 10v-2h-6v2h6zm-3 4c-4.41 0-8-3.59-8-8s3.59-8 8-8v2c-3.31 0-6 2.69-6 6s2.69 6 6 6v2z"></path>
+                <path d="..."></path>
             </svg>
             تسجيل الخروج
         </a>
     </nav>
 </aside>
+
+<!-- [نفس CSS اللي كتبتيه بالضبط هنا بدون تغيير] -->
+
 
 <style>
     .sidebar {

@@ -21,10 +21,11 @@
             </svg>
         </span>
 
-        <div class="dropdown-menu">
-            <a href="{% url 'profile' %}">حسابي</a>
-            <a href="{% url 'login' %}" class="logout">تسجيل الخروج</a>
-        </div>
+<div class="dropdown-menu">
+    <a href="{% url 'profile' %}">حسابي</a>
+    <a href="{% url 'logout' %}" class="logout">تسجيل الخروج</a>
+</div>
+
     </div>
 </div>
 
@@ -124,9 +125,11 @@
         color: red;
     }
 
-    .user-menu:hover .dropdown-menu {
-        display: block;
-    }
+.user-menu:hover .dropdown-menu,
+.dropdown-menu:hover {
+    display: block;
+}
+
 </style>
 
 <script>
