@@ -6,10 +6,12 @@
 <h2 class="section-title">التقارير العامة</h2>
 
 <div class="cards-grid">
-    <div class="card">
-        <h5>إجمالي العملاء</h5>
-        <p>{{ total_clients|default:"0" }}</p>
-    </div>
+    {% if role == 'admin' or role == 'staff' %}
+        <div class="card">
+            <h5>إجمالي العملاء</h5>
+            <p>{{ total_clients|default:"0" }}</p>
+        </div>
+    {% endif %}
 
     <div class="card">
         <h5>إجمالي المهام</h5>
@@ -23,15 +25,23 @@
 
     <div class="card">
         <h5>عدد المستندات</h5>
-        <p>{{ total_documents|default:"0" }}</p>
+        {% if role == 'admin' %}
+            <a href="{% url 'document_list' %}">
+                <p style="font-size: 1.4rem; color: #333; margin: 0;">{{ total_documents|default:"0" }}</p>
+            </a>
+        {% else %}
+            <p>{{ total_documents|default:"0" }}</p>
+        {% endif %}
     </div>
 </div>
 
+{% if role != 'viewer' %}
 <h2 class="section-title">ملاحظات</h2>
 <ul class="notes-list">
     <li>يتم تحديث الإحصائيات يوميًا تلقائيًا.</li>
     <li>يمكنك تصدير التقارير لاحقًا كـ PDF أو Excel.</li>
 </ul>
+{% endif %}
 
 <style>
     .cards-grid {
@@ -47,6 +57,11 @@
         padding: 20px;
         text-align: center;
         box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        transition: box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
 
     .card h5 {
