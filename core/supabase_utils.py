@@ -10,7 +10,7 @@ def upload_to_supabase(file_obj, original_filename):
 
     SUPABASE_BUCKET = "media"
     SUPABASE_PROJECT_URL = settings.SUPABASE_URL.replace("https://", "")
-    SUPABASE_STORAGE_URL = f"https://eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwamZ2bWdhZXdlb2p3bWVka2lsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDc3MzQ3NywiZXhwIjoyMDY2MzQ5NDc3fQ.URc11ePF2BtaqJ0cpmNzep5OaUWRxNr-f9fQHYFGShk/storage/v1/object"
+    SUPABASE_STORAGE_URL = f"https://{SUPABASE_PROJECT_URL}/storage/v1/object"
     SUPABASE_SERVICE_KEY = settings.SUPABASE_SERVICE_KEY
 
     upload_url = f"{SUPABASE_STORAGE_URL}/{SUPABASE_BUCKET}/{path_in_bucket}"
