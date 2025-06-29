@@ -3,18 +3,18 @@
 {% block title %}قائمة المهام{% endblock %}
 
 {% block content %}
-
 <h2 class="section-title">جميع المهام</h2>
 
 <div class="table-responsive">
-    <table class="table">
-        <thead>
+    <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
             <tr>
                 <th>م</th>
                 <th>عنوان المهمة</th>
                 <th>تاريخ التسليم</th>
                 <th>الحالة</th>
-                <th>إجراءات</th>
+                <th>الملف المرفق</th>
+                <th>تغيير الحالة</th>
             </tr>
         </thead>
         <tbody>
@@ -22,14 +22,23 @@
             <tr>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ task.title }}</td>
-                <td>{{ task.due_date }}</td>
+                <td>{{ task.due_date|date:"Y-m-d"|default:"—" }}</td>
                 <td>
                     {% if task.status == 'pending' %}
-                        <span class="badge badge-warning">معلقة</span>
+                        <span class="badge bg-warning text-dark">معلقة</span>
                     {% elif task.status == 'completed' %}
-                        <span class="badge badge-success">مكتملة</span>
+                        <span class="badge bg-success">مكتملة</span>
                     {% elif task.status == 'overdue' %}
-                        <span class="badge badge-danger">متأخرة</span>
+                        <span class="badge bg-danger">متأخرة</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if task.file_url %}
+                        <a href="{{ task.file_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            📎 عرض الملف
+                        </a>
+                    {% else %}
+                        <span class="text-muted">لا يوجد ملف</span>
                     {% endif %}
                 </td>
                 <td>
@@ -42,16 +51,18 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="5">لا توجد مهام.</td>
+                <td colspan="6" class="text-muted">لا توجد مهام مسجلة.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
 
-<!-- ✅ JS لتحديث الحالة -->
+<!-- ✅ تحديث حالة المهمة -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    const csrfToken = '{{ csrf_token }}';
+
     document.querySelectorAll('.update-status').forEach(function (select) {
       select.addEventListener('change', function () {
         const taskId = this.dataset.taskId;
@@ -61,25 +72,25 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
+            'X-CSRFToken': csrfToken
           },
           body: JSON.stringify({ status: newStatus })
         })
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            alert("✅ تم تحديث حالة المهمة");
+            alert("✅ تم تحديث الحالة بنجاح");
+            location.reload();
           } else {
-            alert("❌ خطأ: " + (data.error || "تعذر التحديث"));
+            alert("❌ فشل في التحديث: " + (data.error || "خطأ غير معروف"));
           }
         })
         .catch(err => {
-          alert("❌ خطأ في الاتصال");
+          alert("❌ حدث خطأ في الاتصال بالخادم");
           console.error(err);
         });
       });
     });
   });
 </script>
-
 {% endblock %}

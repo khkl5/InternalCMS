@@ -11,7 +11,7 @@ from core.decorators import role_required
 from clients.models import Client
 from tasks.models import Task
 from content.models import Document
-
+from core.forms import AddStaffForm
 
 @login_required
 def dashboard_view(request):
@@ -85,7 +85,7 @@ def login_view(request):
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            request.session.flush()  # تنظيف الجلسة القديمة لتجنب مشاكل CSRF
+            logout(request)  # إنهاء الجلسة السابقة بشكل آمن بدون حذف CSRF token
             login(request, user)
             return redirect('dashboard')
         else:
@@ -130,3 +130,17 @@ def logout_view(request):
     logout(request)
     messages.info(request, 'تم تسجيل الخروج بنجاح. الرجاء تسجيل الدخول من جديد.')
     return redirect('login')
+
+@role_required(['admin'])
+@login_required
+def add_staff_view(request):
+    if request.method == 'POST':
+        form = AddStaffForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'تم إضافة الموظف بنجاح.')
+            return redirect('add_staff')
+    else:
+        form = AddStaffForm()
+
+    return render(request, 'core/add_staff.html', {'form': form})

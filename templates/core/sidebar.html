@@ -7,25 +7,42 @@
                 </svg>
                 لوحة المدير
             </a>
+
+            <a href="{% url 'add_staff' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M12 5v14m-7-7h14" />
+                </svg>
+                إضافة موظف
+            </a>
+
+            <a href="{% url 'add_task' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M12 5v14m-7-7h14" />
+                </svg>
+                إضافة مهمة
+            </a>
+
             <a href="{% url 'client_list' %}">
                 <svg class="nav-icon" viewBox="0 0 24 24">
                     <path d="..."></path>
                 </svg>
                 العملاء
             </a>
+
             <a href="{% url 'task_list' %}">
                 <svg class="nav-icon" viewBox="0 0 24 24">
                     <path d="..."></path>
                 </svg>
                 المهام
             </a>
+
             <a href="{% url 'reports' %}">
                 <svg class="nav-icon" viewBox="0 0 24 24">
                     <path d="..."></path>
                 </svg>
                 التقارير
             </a>
-        
+
         {% elif request.user.userprofile.role.name == 'staff' %}
             <a href="{% url 'staff_dashboard' %}">
                 <svg class="nav-icon" viewBox="0 0 24 24">
@@ -33,19 +50,21 @@
                 </svg>
                 لوحة الموظف
             </a>
+
             <a href="{% url 'client_list' %}">
                 <svg class="nav-icon" viewBox="0 0 24 24">
                     <path d="..."></path>
                 </svg>
                 عملائي
             </a>
+
             <a href="{% url 'task_list' %}">
                 <svg class="nav-icon" viewBox="0 0 24 24">
                     <path d="..."></path>
                 </svg>
                 المهام
             </a>
-        
+
         {% elif request.user.userprofile.role.name == 'viewer' %}
             <a href="{% url 'viewer_dashboard' %}">
                 <svg class="nav-icon" viewBox="0 0 24 24">
@@ -53,6 +72,7 @@
                 </svg>
                 لوحة المتابعة
             </a>
+
             <a href="{% url 'documents:list' %}">
                 <svg class="nav-icon" viewBox="0 0 24 24">
                     <path d="..."></path>
@@ -78,6 +98,7 @@
         </a>
     </nav>
 </aside>
+
 
 <!-- [نفس CSS اللي كتبتيه بالضبط هنا بدون تغيير] -->
 
