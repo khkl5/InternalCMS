@@ -12,7 +12,9 @@ from clients.models import Client
 from tasks.models import Task
 from content.models import Document
 from core.forms import AddStaffForm
-
+from clients.models import Client
+from tasks.models import Task
+from content.models import Document
 @login_required
 def dashboard_view(request):
     try:
@@ -99,10 +101,45 @@ def profile_view(request):
     return render(request, 'core/profile.html')
 
 
+
+
 @login_required
 def reports_view(request):
-    return render(request, 'content/reports.html')
+    user = request.user
+    role = getattr(user.userprofile.role, 'name', None)
 
+    context = {
+        'role': role,  # نستخدمه داخل القالب للتحكم في العرض
+        'total_clients': 0,
+        'total_tasks': 0,
+        'tasks_completed': 0,
+        'total_documents': 0,
+    }
+
+    if role == 'admin':
+        context.update({
+            'total_clients': Client.objects.count(),
+            'total_tasks': Task.objects.count(),
+            'tasks_completed': Task.objects.filter(status='completed').count(),
+            'total_documents': Document.objects.count(),
+        })
+
+    elif role == 'staff':
+        context.update({
+            'total_clients': Client.objects.filter(assigned_to=user).count(),
+            'total_tasks': Task.objects.filter(assigned_to=user).count(),
+            'tasks_completed': Task.objects.filter(assigned_to=user, status='completed').count(),
+            'total_documents': Document.objects.filter(uploaded_by=user).count(),
+        })
+
+    elif role == 'viewer':
+        context.update({
+            'total_tasks': Task.objects.filter(access_level__in=['public', 'restricted']).count(),
+            'tasks_completed': Task.objects.filter(status='completed', access_level__in=['public', 'restricted']).count(),
+            'total_documents': Document.objects.filter(access_level='public').count(),
+        })
+
+    return render(request, 'content/reports.html', context)
 
 @login_required
 def logout_view(request):

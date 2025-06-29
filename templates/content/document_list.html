@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}قائمة المستندات{% endblock %}
+
+{% block content %}
+
+<h2 class="section-title">جميع المستندات</h2>
+
+<!-- البحث -->
+<form method="get" class="mb-3 text-end">
+    <input type="text" name="q" value="{{ query }}" placeholder="ابحث عن عنوان المستند..." class="form-control" style="max-width: 300px; display: inline-block;">
+    <button type="submit" class="btn btn-primary">بحث</button>
+</form>
+
+<!-- أزرار التصدير -->
+<div class="mb-3 text-end">
+    <a href="#" class="btn btn-secondary">تصدير PDF</a>
+    <a href="#" class="btn btn-success">تصدير Excel</a>
+</div>
+
+<!-- الجدول -->
+<div class="table-responsive">
+    <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>م</th>
+                <th>العنوان</th>
+                <th>العميل</th>
+                <th>تم الرفع بواسطة</th>
+                <th>الوصول</th>
+                <th>عرض</th>
+                <th>تحميل</th>
+                <th>تاريخ الإنشاء</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documents %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ doc.title }}</td>
+                <td>{{ doc.client|default:"—" }}</td>
+                <td>{{ doc.uploaded_by|default:"—" }}</td>
+                <td>{{ doc.get_access_level_display }}</td>
+
+                <!-- عرض الملف -->
+                <td>
+                    {% if doc.file_url %}
+                        <a href="{{ doc.file_url }}" class="btn btn-outline-info btn-sm" target="_blank">عرض</a>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+
+                <!-- تحميل الملف -->
+                <td>
+                    {% if doc.file_url %}
+                        <a href="{{ doc.file_url }}" download class="btn btn-outline-primary btn-sm">تحميل</a>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+
+                <td>{{ doc.created_at|date:"Y-m-d" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
