@@ -11,7 +11,7 @@ class Task(models.Model):
 
     title = models.CharField(max_length=255, verbose_name='عنوان المهمة')
     description = models.TextField(blank=True, verbose_name='الوصف')
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='الموظف المكلّف')
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='الموظف المكلّف')
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='العميل')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='الحالة')
     due_date = models.DateField(null=True, blank=True, verbose_name='تاريخ الاستحقاق')

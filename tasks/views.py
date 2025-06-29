@@ -14,8 +14,7 @@ from .forms import TaskForm
 from .models import Task
 from core.decorators import role_required
 from core.supabase_utils import upload_to_supabase
-from .models import Task
-from .forms import TaskForm
+from django.http import JsonResponse
 
 # ✅ عرض قائمة المهام
 @login_required
@@ -80,5 +79,18 @@ def update_task_status(request, task_id):
 
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'error': 'تنسيق البيانات غير صالح'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@require_POST
+@login_required
+@role_required(['admin'])
+def delete_task_view(request, task_id):
+    try:
+        task = Task.objects.get(id=task_id)
+        task.delete()
+        return JsonResponse({'success': True})
+    except Task.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'المهمة غير موجودة'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
