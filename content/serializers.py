@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Document
-from utils.supabase_client import supabase
+from django.conf import settings
 
 class DocumentSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
@@ -11,10 +11,8 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     def get_file_url(self, obj):
         if obj.file_path:
-            bucket_name = "internal-cms"
-            signed_url_resp = supabase.storage.from_(bucket_name).create_signed_url(
-                path=obj.file_path,
-                expires_in=3600  # 1 ساعة
-            )
-            return signed_url_resp.get('signedURL')
+            bucket_name = settings.SUPABASE_STORAGE_BUCKET  # "media"
+            project_url = settings.SUPABASE_URL.replace("https://", "")
+            public_url = f"https://{project_url}/storage/v1/object/public/{bucket_name}/{obj.file_path}"
+            return public_url
         return ""

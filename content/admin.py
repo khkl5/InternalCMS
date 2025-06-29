@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django import forms
 from .models import Document
-from utils.supabase_client import supabase
 from django.conf import settings
 import re
 import unicodedata
@@ -43,21 +42,21 @@ class DocumentAdmin(admin.ModelAdmin):
             file_bytes = upload_file.file.read()
 
             # رفع إلى supabase
-            supabase.storage.from_(bucket_name).upload(
-                path=bucket_file_path,
-                file=file_bytes,
-                file_options={ "contentType": upload_file.content_type }
-            )
+            #supabase.storage.from_(bucket_name).upload(
+                #path=bucket_file_path,
+               # file=file_bytes,
+                #file_options={ "contentType": upload_file.content_type }
+           # )#
 
             # Signed URL لمدة يوم
-            signed_url_resp = supabase.storage.from_(bucket_name).create_signed_url(
-                path=bucket_file_path,
-                expires_in=86400
-            )
+            #signed_url_resp = supabase.storage.from_(bucket_name).create_signed_url(
+             #   path=bucket_file_path,
+             #   expires_in=86400
+           # )
 
             # نخزن البيانات في الموديل
             obj.file_path = bucket_file_path
-            obj.file_url = signed_url_resp.get('signedURL')
+           # obj.file_url = signed_url_resp.get('signedURL')
 
         # حفظ الموديل
         super().save_model(request, obj, form, change)

@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import UserProfile
 from .role import Role  # استيراد نموذج الدور
 
+
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'get_role_name', 'phone_number', 'department')

@@ -58,6 +58,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'InternalCMS.wsgi.application'
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 
 # قاعدة البيانات
 USE_POSTGRES = os.getenv("USE_POSTGRES", "False") == "True"
