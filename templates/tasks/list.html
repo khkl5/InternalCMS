@@ -13,8 +13,10 @@
                 <th>عنوان المهمة</th>
                 <th>تاريخ التسليم</th>
                 <th>الحالة</th>
+                <th>الموظف المسؤول</th>
                 <th>الملف المرفق</th>
                 <th>تغيير الحالة</th>
+                <th>إجراءات</th>
             </tr>
         </thead>
         <tbody>
@@ -33,6 +35,9 @@
                     {% endif %}
                 </td>
                 <td>
+                    {{ task.assigned_to.get_full_name|default:task.assigned_to.username|default:"—" }}
+                </td>
+                <td>
                     {% if task.file_url %}
                         <a href="{{ task.file_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
                             📎 عرض الملف
@@ -48,17 +53,26 @@
                         <option value="overdue" {% if task.status == 'overdue' %}selected{% endif %}>متأخرة</option>
                     </select>
                 </td>
+                <td>
+                    {% if request.user.userprofile.role.name == 'admin' %}
+                        <button class="btn btn-sm btn-danger delete-task-btn" data-task-id="{{ task.id }}">
+                            🗑️ حذف
+                        </button>
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" class="text-muted">لا توجد مهام مسجلة.</td>
+                <td colspan="8" class="text-muted">لا توجد مهام مسجلة.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
 
-<!-- ✅ تحديث حالة المهمة -->
+<!-- ✅ سكربت تغيير الحالة -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const csrfToken = '{{ csrf_token }}';
@@ -89,6 +103,34 @@
           alert("❌ حدث خطأ في الاتصال بالخادم");
           console.error(err);
         });
+      });
+    });
+
+    // ✅ حذف المهمة
+    document.querySelectorAll('.delete-task-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const taskId = this.dataset.taskId;
+        if (confirm("هل أنت متأكد أنك تريد حذف هذه المهمة؟")) {
+          fetch(`/tasks/delete/${taskId}/`, {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': csrfToken
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              alert("✅ تم حذف المهمة بنجاح");
+              location.reload();
+            } else {
+              alert("❌ فشل في الحذف: " + (data.error || "خطأ غير معروف"));
+            }
+          })
+          .catch(err => {
+            alert("❌ حدث خطأ أثناء الحذف");
+            console.error(err);
+          });
+        }
       });
     });
   });
