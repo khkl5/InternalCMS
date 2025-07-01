@@ -8,12 +8,10 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# أمان
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", 'fallback-secret-if-missing')
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = os.getenv("DEBUG", "").lower() in ("1", "true", "yes")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
-# إعدادات Apps
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -21,8 +19,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # Apps الخاصة بك
     'core',
     'content',
     'tasks',
@@ -45,7 +41,7 @@ LOGIN_URL = 'login'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [ BASE_DIR / 'templates' ],  # ← اضيف هذا السطر هنا
+        'DIRS': [ BASE_DIR / 'templates' ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -58,10 +54,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'InternalCMS.wsgi.application'
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 
-# قاعدة البيانات
-USE_POSTGRES = os.getenv("USE_POSTGRES", "False") == "True"
+USE_POSTGRES = os.getenv("USE_POSTGRES", "False").lower() in ("1", "true", "yes")
 
 if USE_POSTGRES:
     DATABASES = {
@@ -81,7 +75,7 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-# المصادقة
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -97,35 +91,29 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# اللغات والتوقيت
 LANGUAGE_CODE = 'ar'
 TIME_ZONE = 'Asia/Riyadh'
 USE_I18N = True
 USE_TZ = True
 
-# الملفات الثابتة Static files
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [ BASE_DIR / "static" ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# رفع ملفات media (لو حبيتي تخزين محلي)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# حقول افتراضية
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # إعدادات Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "media")
-SUPABASE_STORAGE_BUCKET = "media"
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'debug',
     messages.INFO: 'info',
     messages.SUCCESS: 'success',
     messages.WARNING: 'warning',
-    messages.ERROR: 'error',
+    messages.ERROR: 'danger',
 }

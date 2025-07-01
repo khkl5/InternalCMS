@@ -43,6 +43,13 @@
                 التقارير
             </a>
 
+            <a href="{% url 'document_list' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                المستندات
+            </a>
+
         {% elif request.user.userprofile.role.name == 'staff' %}
             <a href="{% url 'staff_dashboard' %}">
                 <svg class="nav-icon" viewBox="0 0 24 24">
@@ -65,6 +72,13 @@
                 المهام
             </a>
 
+            <a href="{% url 'document_list' %}">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                مستنداتي
+            </a>
+
         {% elif request.user.userprofile.role.name == 'viewer' %}
             <a href="{% url 'viewer_dashboard' %}">
                 <svg class="nav-icon" viewBox="0 0 24 24">
@@ -73,11 +87,11 @@
                 لوحة المتابعة
             </a>
 
-            <a href="{% url 'documents:list' %}">
+            <a href="{% url 'document_list' %}">
                 <svg class="nav-icon" viewBox="0 0 24 24">
-                    <path d="..."></path>
+                    <path d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
-                الملفات
+                المستندات
             </a>
         {% endif %}
 
