@@ -1,11 +1,10 @@
-{% extends 'base.html' %}
-
-{% block title %}ممنوع الوصول{% endblock %}
+{% extends "base.html" %}
+{% block title %}403 - لا تملك الصلاحية{% endblock %}
 
 {% block content %}
-<div class="container text-center mt-5">
-    <h1 class="text-danger">🚫 ليس لديك صلاحية للوصول إلى هذه الصفحة</h1>
-    <p>يرجى العودة إلى الصفحة الرئيسية أو تسجيل الدخول بحساب مختلف.</p>
-    <a href="{% url 'dashboard' %}" class="btn btn-primary mt-3">العودة للوحة التحكم</a>
+<div class="text-center mt-5">
+    <h1 class="display-4 text-danger">🚫 403</h1>
+    <p class="lead">ليس لديك صلاحية للوصول إلى هذه الصفحة.</p>
+    <a href="/" class="btn btn-primary">العودة للرئيسية</a>
 </div>
 {% endblock %}

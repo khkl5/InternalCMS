@@ -1,40 +1,49 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
+
 {% block title %}رفع مستند جديد{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="section-title text-center mb-4">رفع مستند جديد</h2>
+<div dir="rtl" class="my-5" style="margin-right: 40px; max-width: 600px;">
+    <div class="card shadow border-0 rounded-4 p-4 bg-white text-end">
+        <h2 class="mb-4 text-primary fw-bold" style="font-size: 1.8rem;">
+            رفع مستند جديد
+        </h2>
 
-    <form method="post" enctype="multipart/form-data" class="border p-4 rounded bg-light shadow-sm">
-        {% csrf_token %}
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
 
-        <div class="mb-3">
-            <label for="id_title" class="form-label">عنوان المستند</label>
-            {{ form.title|add_class:"form-control" }}
-        </div>
+            <div class="mb-4">
+                <label for="id_title" class="form-label fw-semibold">عنوان المستند</label>
+                {{ form.title|add_class:"form-control form-control-lg border-2 shadow-sm text-end" }}
+            </div>
 
-        <div class="mb-3">
-            <label for="id_client" class="form-label">العميل المرتبط</label>
-            {{ form.client|add_class:"form-select" }}
-        </div>
+            <div class="mb-4">
+                <label for="id_client" class="form-label fw-semibold">العميل المرتبط</label>
+                {{ form.client|add_class:"form-select form-select-lg border-2 shadow-sm text-end" }}
+            </div>
 
-        <div class="mb-3">
-            <label for="id_access_level" class="form-label">مستوى الوصول</label>
-            {{ form.access_level|add_class:"form-select" }}
-        </div>
+            <div class="mb-4">
+                <label for="id_access_level" class="form-label fw-semibold">مستوى الوصول</label>
+                {{ form.access_level|add_class:"form-select form-select-lg border-2 shadow-sm text-end" }}
+            </div>
 
-        <div class="mb-3">
-            <label for="id_file" class="form-label">اختر الملف</label>
-            {{ form.file|add_class:"form-control" }}
-            <div id="file-name" class="form-text text-muted mt-1">لم يتم اختيار أي ملف.</div>
-        </div>
+            <div class="mb-4">
+                <label for="id_file" class="form-label fw-semibold">اختر الملف</label>
+                {{ form.file|add_class:"form-control form-control-lg border-2 shadow-sm text-end" }}
+                <small id="file-name" class="form-text text-muted mt-2 d-block">لم يتم اختيار أي ملف.</small>
+            </div>
 
-        <button type="submit" class="btn btn-primary">رفع المستند</button>
-    </form>
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill">
+                    📎 رفع المستند
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
-    // عرض اسم الملف بمجرد اختياره
     document.getElementById('id_file').addEventListener('change', function () {
         const fileName = this.files[0]?.name || "لم يتم اختيار أي ملف.";
         document.getElementById('file-name').textContent = "الملف المحدد: " + fileName;

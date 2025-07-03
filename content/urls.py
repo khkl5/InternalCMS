@@ -7,6 +7,7 @@ from .views import (
     upload_document_view,
 )
 
+
 router = DefaultRouter()
 router.register(r'documents-api', DocumentViewSet, basename='document')
 
