@@ -6,6 +6,12 @@
 
 <h2 class="section-title">جميع المستندات</h2>
 
+{% if role == 'staff' %}
+    <div class="text-end mb-3">
+        <a href="{% url 'upload_document' %}" class="btn btn-success">🔼 رفع مستند جديد</a>
+    </div>
+{% endif %}
+
 <!-- البحث -->
 <form method="get" class="mb-3 text-end">
     <input type="text" name="q" value="{{ query }}" placeholder="ابحث عن عنوان المستند..." class="form-control" style="max-width: 300px; display: inline-block;">
@@ -18,7 +24,6 @@
     <a href="#" class="btn btn-success">تصدير Excel</a>
 </div>
 
-<!-- الجدول -->
 <div class="table-responsive">
     <table class="table table-bordered text-center align-middle">
         <thead class="table-light">
@@ -31,6 +36,9 @@
                 <th>عرض</th>
                 <th>تحميل</th>
                 <th>تاريخ الإنشاء</th>
+                {% if role == 'admin' %}
+                    <th>حذف</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -44,24 +52,42 @@
 
                 <!-- عرض الملف -->
                 <td>
-                    {% if doc.file_url %}
-                        <a href="{{ doc.file_url }}" class="btn btn-outline-info btn-sm" target="_blank">عرض</a>
+                    {% if doc.can_download and doc.file_url %}
+                        {% if doc.is_image %}
+                            <a href="{{ doc.file_url }}" class="btn btn-outline-info btn-sm" target="_blank">عرض</a>
+                        {% elif doc.is_pdf %}
+                            <a href="{{ doc.file_url }}" class="btn btn-outline-info btn-sm" target="_blank">عرض PDF</a>
+                        {% else %}
+                            <span class="text-muted">لا يمكن عرض هذا النوع</span>
+                        {% endif %}
                     {% else %}
-                        —
+                        <span class="text-muted">غير مصرح</span>
                     {% endif %}
                 </td>
 
                 <!-- تحميل الملف -->
                 <td>
-                    {% if doc.file_url %}
+                    {% if doc.can_download and doc.file_url %}
                         <a href="{{ doc.file_url }}" download class="btn btn-outline-primary btn-sm">تحميل</a>
                     {% else %}
-                        —
+                        <span class="text-muted">غير مصرح</span>
                     {% endif %}
                 </td>
 
                 <td>{{ doc.created_at|date:"Y-m-d" }}</td>
+
+                {% if role == 'admin' %}
+                <!-- زر الحذف -->
+                <td>
+                    <form method="post" action="{% url 'delete_document' document_id=doc.id %}" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">🗑 حذف</button>
+                    </form>
+                </td>
+                {% endif %}
             </tr>
+            {% empty %}
+            <tr><td colspan="9">لا توجد مستندات حالياً.</td></tr>
             {% endfor %}
         </tbody>
     </table>
