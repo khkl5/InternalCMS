@@ -1,36 +1,41 @@
-import uuid
-import json
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from core.decorators import role_required
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .forms import TaskForm
-from .models import Task
+
 from core.decorators import role_required
 from core.supabase_utils import upload_to_supabase
-from django.http import JsonResponse
 from clients.models import Client
+from .forms import TaskForm
+from .models import Task
 
+import json
 
 # ✅ عرض قائمة المهام
 @login_required
 @role_required(['admin', 'staff'])
 def task_list_view(request):
     user = request.user
-    if user.userprofile.role.name == 'admin':
-        all_tasks = Task.objects.order_by('-created_at')
+    role = user.userprofile.role.name
+
+    if role == 'admin':
+        tasks = Task.objects.order_by('-created_at')
     else:
-        all_tasks = Task.objects.filter(assigned_to=user).order_by('-created_at')
+        tasks = Task.objects.filter(assigned_to=user).order_by('-created_at')
 
-    return render(request, 'tasks/list.html', {'all_tasks': all_tasks})
+    return render(request, 'tasks/list.html', {'all_tasks': tasks})
 
 
+# ✅ عرض تفاصيل مهمة
+@login_required
+def task_detail_view(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    return render(request, 'tasks/detail.html', {'task': task})
+
+
+# ✅ إضافة مهمة (للمدير فقط)
 @login_required
 @role_required(['admin'])
 def add_task_view(request):
@@ -38,8 +43,8 @@ def add_task_view(request):
         form = TaskForm(request.POST, request.FILES)
         if form.is_valid():
             task = form.save(commit=False)
-            uploaded_file = request.FILES.get('file')
 
+            uploaded_file = request.FILES.get('file')
             if uploaded_file:
                 try:
                     public_url, file_path = upload_to_supabase(uploaded_file, uploaded_file.name)
@@ -57,7 +62,41 @@ def add_task_view(request):
         form = TaskForm()
 
     return render(request, 'tasks/add_task.html', {'form': form})
-# ✅ تحديث حالة المهمة
+
+
+# ✅ إضافة مهمة مرتبطة بعميل (للمدير فقط)
+@login_required
+@role_required(['admin'])
+def add_task_for_client(request, client_id):
+    client = get_object_or_404(Client, id=client_id)
+
+    if request.method == 'POST':
+        form = TaskForm(request.POST, request.FILES)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.client = client
+
+            uploaded_file = request.FILES.get('file')
+            if uploaded_file:
+                try:
+                    public_url, file_path = upload_to_supabase(uploaded_file, uploaded_file.name)
+                    task.file_url = public_url
+                    task.file_path = file_path
+                except Exception as e:
+                    messages.error(request, f"فشل رفع الملف: {e}")
+                    return render(request, 'tasks/add_task.html', {'form': form, 'client': client})
+
+            task.save()
+            form.save_m2m()
+            messages.success(request, 'تمت إضافة المهمة لهذا العميل بنجاح.')
+            return redirect('client_tasks', client_id=client.id)
+    else:
+        form = TaskForm()
+
+    return render(request, 'tasks/add_task.html', {'form': form, 'client': client})
+
+
+# ✅ تحديث حالة المهمة (مدير أو صاحب المهمة فقط)
 @require_POST
 @login_required
 @role_required(['admin', 'staff'])
@@ -65,9 +104,7 @@ def update_task_status(request, task_id):
     try:
         data = json.loads(request.body)
         new_status = data.get('status')
-        valid_statuses = ['pending', 'completed', 'overdue']
-
-        if new_status not in valid_statuses:
+        if new_status not in ['pending', 'completed', 'overdue']:
             return JsonResponse({'success': False, 'error': 'الحالة غير صالحة'})
 
         task = get_object_or_404(Task, pk=task_id)
@@ -84,6 +121,8 @@ def update_task_status(request, task_id):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
 
+
+# ✅ حذف مهمة (مدير فقط)
 @require_POST
 @login_required
 @role_required(['admin'])
@@ -96,31 +135,3 @@ def delete_task_view(request, task_id):
         return JsonResponse({'success': False, 'error': 'المهمة غير موجودة'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
-@login_required
-@role_required(['admin'])
-def add_task_for_client(request, client_id):
-    client = get_object_or_404(Client, id=client_id)
-
-    if request.method == 'POST':
-        form = TaskForm(request.POST, request.FILES)
-        if form.is_valid():
-            task = form.save(commit=False)
-            task.client = client
-
-            uploaded_file = request.FILES.get('file')
-            if uploaded_file:
-                public_url, file_path = upload_to_supabase(uploaded_file, uploaded_file.name)
-                task.file_url = public_url
-                task.file_path = file_path
-
-            task.save()
-            form.save_m2m()
-            messages.success(request, 'تمت إضافة المهمة لهذا العميل بنجاح.')
-            return redirect('client_tasks', client_id=client.id)
-    else:
-        form = TaskForm()
-
-    return render(request, 'tasks/add_task.html', {
-        'form': form,
-        'client': client,
-    })

@@ -1,14 +1,18 @@
 from django.urls import path
 from . import views
+from .views import dashboard_view
+
 
 urlpatterns = [
     path('', views.dashboard_view, name='dashboard'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('admin-dashboard/', dashboard_view, name='admin_dashboard'),
 
     # لوحات التحكم
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('staff-dashboard/', views.staff_dashboard, name='staff_dashboard'),
+    
 
     # صفحات عامة
     path('profile/', views.profile_view, name='profile'),

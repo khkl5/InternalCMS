@@ -20,6 +20,15 @@
         <div class="card">📁 الملفات: {{ total_documents }}</div>
       {% endif %}
     </div>
+    <h3>المهام الأخيرة المسندة إليك</h3>
+<ul>
+  {% for task in latest_tasks %}
+    <li>{{ task.title }} - {{ task.get_status_display }}</li>
+  {% empty %}
+    <li>لا توجد مهام حالياً.</li>
+  {% endfor %}
+</ul>
+
 
     {% if latest_tasks %}
       <h3 style="margin-top: 30px;">📌 أحدث المهام</h3>

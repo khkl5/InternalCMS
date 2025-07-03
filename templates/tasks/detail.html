@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="padding: 20px;">
+  <h2>📋 تفاصيل المهمة</h2>
+
+  <div style="margin-top: 15px;">
+    <p><strong>📌 العنوان:</strong> {{ task.title }}</p>
+    <p><strong>📝 الوصف:</strong> {{ task.description|default:"لا يوجد وصف" }}</p>
+    <p><strong>📅 تاريخ الاستحقاق:</strong> {{ task.due_date|default:"غير محدد" }}</p>
+    <p>
+      <strong>⚙️ الحالة:</strong>
+      {% if task.status == 'pending' %}
+        <span style="color: orange;">⏳ قيد التنفيذ</span>
+      {% elif task.status == 'completed' %}
+        <span style="color: green;">✅ منتهية</span>
+      {% elif task.status == 'overdue' %}
+        <span style="color: red;">⏰ متأخرة</span>
+      {% endif %}
+    </p>
+    <p><strong>👤 الموظف المكلّف:</strong> {{ task.assigned_to.username|default:"غير محدد" }}</p>
+    <p><strong>👥 العميل:</strong> {{ task.client.name|default:"غير محدد" }}</p>
+
+    {% if task.file_url %}
+      <p><strong>📎 الملف المرفق:</strong> 
+        <a href="{{ task.file_url }}" target="_blank" style="color: blue;">تحميل الملف</a>
+      </p>
+    {% endif %}
+
+    {% if task.documents.all %}
+      <p><strong>📁 مستندات إضافية:</strong></p>
+      <ul>
+        {% for doc in task.documents.all %}
+          <li>
+            <a href="{{ doc.file_url }}" target="_blank">{{ doc.title }}</a>
+          </li>
+        {% empty %}
+          <li>لا توجد مستندات إضافية</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+
+  <a href="{% url 'task_list' %}" class="button" style="display: inline-block; margin-top: 20px;">⬅️ العودة لقائمة المهام</a>
+</div>
+{% endblock %}

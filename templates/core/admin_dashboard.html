@@ -6,7 +6,7 @@
   {% include 'core/sidebar.html' %}
   <div class="main-content">
     {% include 'header.html' %}
-    
+
     <h2>مرحبًا {{ request.user.username }}</h2>
     <p>دورك: {{ role }}</p>
 
@@ -28,45 +28,97 @@
       <h3 style="margin-top: 30px;">📌 أحدث المهام</h3>
       <ul class="task-list">
         {% for task in latest_tasks %}
-          <li>{{ task.title }} — {{ task.status }}</li>
+          <li class="task-item">
+            <div class="task-title">
+              <a href="{% url 'task_detail' task.id %}">
+                📎 {{ task.title }}
+              </a>
+            </div>
+            <div class="task-status">
+              {% if task.status == 'pending' %}
+                <span class="status status-pending">⏳ قيد التنفيذ</span>
+              {% elif task.status == 'completed' %}
+                <span class="status status-completed">✅ منتهية</span>
+              {% elif task.status == 'overdue' %}
+                <span class="status status-overdue">⏰ متأخرة</span>
+              {% else %}
+                <span class="status">❓ غير معروفة</span>
+              {% endif %}
+            </div>
+          </li>
+        {% empty %}
+          <li>لا توجد مهام حالياً.</li>
         {% endfor %}
       </ul>
     {% endif %}
   </div>
 </div>
+{% endblock %}
 
 <style>
 .dashboard {
-    display: flex;
-    font-family: 'Tajawal', sans-serif;
+  display: flex;
+  font-family: 'Tajawal', sans-serif;
 }
 .main-content {
-    flex-grow: 1;
-    padding: 30px;
+  flex-grow: 1;
+  padding: 30px;
 }
 .stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin: 20px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 20px 0;
 }
 .card {
-    background: #C6E5EA;
-    padding: 20px;
-    border-radius: 10px;
-    font-size: 16px;
-    min-width: 150px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background: #C6E5EA;
+  padding: 20px;
+  border-radius: 10px;
+  font-size: 16px;
+  min-width: 150px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 .task-list {
-    background: #F2F2F2;
-    padding: 15px;
-    border-radius: 6px;
-    list-style: none;
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  list-style: none;
 }
-.task-list li {
-    padding: 5px 0;
-    border-bottom: 1px solid #ddd;
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.task-title a {
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+  transition: color 0.3s;
+}
+.task-title a:hover {
+  color: #007bff;
+}
+.status {
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+.status-overdue {
+  background-color: #f8d7da;
+  color: #721c24;
 }
 </style>
-{% endblock %}
