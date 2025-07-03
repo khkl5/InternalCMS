@@ -109,7 +109,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # إعدادات Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY", "")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")  # ← هذا السطر لازم
 SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "media")
+
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'debug',

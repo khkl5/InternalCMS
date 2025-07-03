@@ -15,6 +15,8 @@ from .models import Task
 from core.decorators import role_required
 from core.supabase_utils import upload_to_supabase
 from django.http import JsonResponse
+from clients.models import Client
+
 
 # ✅ عرض قائمة المهام
 @login_required
@@ -94,3 +96,31 @@ def delete_task_view(request, task_id):
         return JsonResponse({'success': False, 'error': 'المهمة غير موجودة'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+@login_required
+@role_required(['admin'])
+def add_task_for_client(request, client_id):
+    client = get_object_or_404(Client, id=client_id)
+
+    if request.method == 'POST':
+        form = TaskForm(request.POST, request.FILES)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.client = client
+
+            uploaded_file = request.FILES.get('file')
+            if uploaded_file:
+                public_url, file_path = upload_to_supabase(uploaded_file, uploaded_file.name)
+                task.file_url = public_url
+                task.file_path = file_path
+
+            task.save()
+            form.save_m2m()
+            messages.success(request, 'تمت إضافة المهمة لهذا العميل بنجاح.')
+            return redirect('client_tasks', client_id=client.id)
+    else:
+        form = TaskForm()
+
+    return render(request, 'tasks/add_task.html', {
+        'form': form,
+        'client': client,
+    })
