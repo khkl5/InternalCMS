@@ -63,7 +63,7 @@ def dashboard_view(request):
         'staff': 'core/staff_dashboard.html',
         'viewer': 'core/viewer_dashboard.html',
     }
-    template = template_map.get(role, 'core/dashboard.html')
+    template = template_map.get(role, 'core/admin_dashboard.html')
     return render(request, template, context)
 
 
