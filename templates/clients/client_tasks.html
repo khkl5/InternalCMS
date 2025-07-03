@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}مهام العميل: {{ client.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">📋 مهام العميل: {{ client.name }}</h2>
+    <a href="{% url 'add_task_for_client' client.id %}" class="btn btn-primary">
+        + إضافة مهمة جديدة
+    </a>
+</div>
+
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-light text-center">
+        <tr>
+            <th>العنوان</th>
+            <th>الوصف</th>
+            <th>الموظف</th>
+            <th>الحالة</th>
+            <th>تاريخ الإنشاء</th>
+            <th>تاريخ التسليم</th>
+            <th>الملف</th>
+            <th>الإجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for task in tasks %}
+        <tr class="text-center">
+            <td>{{ task.title }}</td>
+            <td class="text-start">{{ task.description|truncatewords:10 }}</td>
+            <td>{{ task.assigned_to|default:"-" }}</td>
+            <td>
+                {% if task.status == 'pending' %}
+                    <span class="badge bg-warning text-dark">قيد التنفيذ</span>
+                {% elif task.status == 'completed' %}
+                    <span class="badge bg-success">منتهية</span>
+                {% elif task.status == 'overdue' %}
+                    <span class="badge bg-danger">متأخرة</span>
+                {% endif %}
+            </td>
+            <td>{{ task.created_at|date:"Y-m-d" }}</td>
+            <td>{{ task.due_date|default:"-" }}</td>
+            <td>
+                {% if task.file_url %}
+                    <a href="{{ task.file_url }}" target="_blank" class="btn btn-sm btn-outline-info">📄 عرض</a>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                <form method="post" action="{% url 'delete_task' task.id %}" onsubmit="return confirm('هل أنت متأكد من حذف المهمة؟');">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger" title="حذف المهمة">🗑 حذف</button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8" class="text-center">لا توجد مهام لهذا العميل.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'client_list' %}" class="btn btn-secondary mt-3">← رجوع لقائمة العملاء</a>
+{% endblock %}
