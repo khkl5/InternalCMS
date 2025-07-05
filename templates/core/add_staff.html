@@ -2,92 +2,139 @@
 {% load static %}
 
 {% block content %}
-<div class="dashboard">
-  {% include 'core/sidebar.html' %}
-  <div class="main-content">
-    {% include 'header.html' %}
+<div class="add-staff-container">
+  <div class="add-staff-card">
+    <h2>➕ إضافة موظف جديد</h2>
+    <form method="post" action="{% url 'add_staff' %}">
+      {% csrf_token %}
 
-    <h2 style="margin-bottom: 20px;">➕ إضافة موظف جديد</h2>
+      <div class="form-group">
+        <label for="id_full_name">الاسم الكامل</label>
+        {{ form.full_name }}
+      </div>
 
-    <div class="form-card">
-      <form method="post" action="{% url 'add_staff' %}">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="submit-btn">إضافة</button>
-      </form>
+      <div class="form-group">
+        <label for="id_username">اسم المستخدم</label>
+        {{ form.username }}
+      </div>
 
-      {% if messages %}
-        <ul class="messages">
-          {% for message in messages %}
-            <li>{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    </div>
+      <div class="form-group">
+        <label for="id_password">كلمة المرور</label>
+        {{ form.password }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_email">البريد الإلكتروني</label>
+        {{ form.email }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_phone_number">رقم الجوال</label>
+        {{ form.phone_number }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_department">القسم</label>
+        {{ form.department }}
+      </div>
+
+      <button type="submit" class="submit-btn">إضافة الموظف</button>
+    </form>
+
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
   </div>
 </div>
+{% endblock %}
 
+{% block extra_css %}
 <style>
-.dashboard {
-    display: flex;
-    font-family: 'Tajawal', sans-serif;
+body {
+  background-color: #F0F4F8;
+  font-family: 'Tajawal', sans-serif;
 }
 
-.main-content {
-    flex-grow: 1;
-    padding: 30px;
+.add-staff-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 80px;
+  padding-bottom: 40px;
 }
 
-.form-card {
-    background: #C6E5EA;
-    padding: 30px;
-    border-radius: 10px;
-    max-width: 500px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+.add-staff-card {
+  background: #ffffff;
+  padding: 30px 25px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  max-width: 500px;
+  width: 100%;
+  color: #2F4157;
 }
 
-.form-card form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+.add-staff-card h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.4rem;
+  color: #2F4157;
 }
 
-.form-card input,
-.form-card select,
-.form-card textarea {
-    padding: 10px;
-    border: 1px solid #8EBABF;
-    border-radius: 6px;
-    font-size: 15px;
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #2F4157;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #8EBABF;
+  border-radius: 6px;
+  font-size: 15px;
+  background-color: #F9FBFC;
 }
 
 .submit-btn {
-    background-color: #08748C;
-    color: white;
-    border: none;
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  width: 100%;
+  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+  margin-top: 10px;
 }
 
 .submit-btn:hover {
-    background-color: #066272;
+  opacity: 0.9;
 }
 
 .messages {
-    margin-top: 20px;
-    list-style: none;
-    padding: 0;
+  margin-top: 20px;
+  list-style: none;
+  padding: 0;
+  text-align: center;
 }
 
 .messages li {
-    background: #d4edda;
-    color: #155724;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 5px;
+  background: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 5px;
 }
 </style>
 {% endblock %}

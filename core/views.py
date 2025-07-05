@@ -15,6 +15,11 @@ from core.forms import AddStaffForm
 from clients.models import Client
 from tasks.models import Task
 from content.models import Document
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.models import User
+
+
 @login_required
 def dashboard_view(request):
     try:

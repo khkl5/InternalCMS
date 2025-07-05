@@ -10,8 +10,12 @@ from core.supabase_utils import upload_to_supabase
 from clients.models import Client
 from .forms import TaskForm
 from .models import Task
+from content.models import Document
+from django.contrib.auth.decorators import login_required
+from core.decorators import role_required
 
 import json
+
 
 # ✅ عرض قائمة المهام
 @login_required
@@ -21,9 +25,9 @@ def task_list_view(request):
     role = user.userprofile.role.name
 
     if role == 'admin':
-        tasks = Task.objects.order_by('-created_at')
+        tasks = Task.objects.all()  # لا حاجة لـ order_by بسبب ordering في الموديل
     else:
-        tasks = Task.objects.filter(assigned_to=user).order_by('-created_at')
+        tasks = Task.objects.filter(assigned_to=user)
 
     return render(request, 'tasks/list.html', {'all_tasks': tasks})
 
@@ -135,3 +139,40 @@ def delete_task_view(request, task_id):
         return JsonResponse({'success': False, 'error': 'المهمة غير موجودة'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ✅ لوحة تحكم المدير
+@login_required
+@role_required(['admin'])
+def admin_dashboard_view(request):
+    total_tasks = Task.objects.count()
+    tasks_completed = Task.objects.filter(status='completed').count()
+    total_documents = Document.objects.count()
+    total_clients = Client.objects.count()
+    latest_tasks = Task.objects.all()[:5]  # ترتيب تلقائي من الموديل
+
+    context = {
+        'total_tasks': total_tasks,
+        'tasks_completed': tasks_completed,
+        'total_documents': total_documents,
+        'total_clients': total_clients,
+        'latest_tasks': latest_tasks,
+        'role': request.user.userprofile.role.name,
+    }
+
+    return render(request, 'core/admin_dashboard.html', context)
+
+@login_required
+@role_required(['staff'])
+def staff_dashboard_view(request):
+    user = request.user
+    role = user.userprofile.role.name
+
+    total_tasks = Task.objects.filter(assigned_to=user).count()
+    total_documents = Document.objects.filter(uploaded_by=user).count()
+
+    return render(request, 'core/staff_dashboard.html', {
+        'role': role,
+        'total_tasks': total_tasks,
+        'total_documents': total_documents,
+    })

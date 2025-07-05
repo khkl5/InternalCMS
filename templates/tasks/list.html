@@ -3,76 +3,76 @@
 {% block title %}قائمة المهام{% endblock %}
 
 {% block content %}
-<h2 class="section-title">جميع المهام</h2>
+<div class="tasks-container">
+  <div class="tasks-card">
+    <h2>📋 قائمة جميع المهام</h2>
 
-<div class="table-responsive">
-    <table class="table table-bordered text-center align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>م</th>
-                <th>عنوان المهمة</th>
-                <th>تاريخ التسليم</th>
-                <th>الحالة</th>
-                <th>الموظف المسؤول</th>
-                <th>الملف المرفق</th>
-                <th>تغيير الحالة</th>
-                <th>إجراءات</th>
-            </tr>
+    <div class="table-responsive">
+      <table class="tasks-table">
+        <thead>
+          <tr>
+            <th>م</th>
+            <th>عنوان المهمة</th>
+            <th>تاريخ التسليم</th>
+            <th>الحالة</th>
+            <th>الموظف المسؤول</th>
+            <th>الملف المرفق</th>
+            <th>تغيير الحالة</th>
+            <th>إجراءات</th>
+          </tr>
         </thead>
         <tbody>
-            {% for task in all_tasks %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ task.title }}</td>
-                <td>{{ task.due_date|date:"Y-m-d"|default:"—" }}</td>
-                <td>
-                    {% if task.status == 'pending' %}
-                        <span class="badge bg-warning text-dark">معلقة</span>
-                    {% elif task.status == 'completed' %}
-                        <span class="badge bg-success">مكتملة</span>
-                    {% elif task.status == 'overdue' %}
-                        <span class="badge bg-danger">متأخرة</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {{ task.assigned_to.get_full_name|default:task.assigned_to.username|default:"—" }}
-                </td>
-                <td>
-                    {% if task.file_url %}
-                        <a href="{{ task.file_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                            📎 عرض الملف
-                        </a>
-                    {% else %}
-                        <span class="text-muted">لا يوجد ملف</span>
-                    {% endif %}
-                </td>
-                <td>
-                    <select class="form-select update-status" data-task-id="{{ task.id }}">
-                        <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>معلقة</option>
-                        <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>مكتملة</option>
-                        <option value="overdue" {% if task.status == 'overdue' %}selected{% endif %}>متأخرة</option>
-                    </select>
-                </td>
-                <td>
-                    {% if request.user.userprofile.role.name == 'admin' %}
-                        <button class="btn btn-sm btn-danger delete-task-btn" data-task-id="{{ task.id }}">
-                            🗑️ حذف
-                        </button>
-                    {% else %}
-                        <span class="text-muted">—</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8" class="text-muted">لا توجد مهام مسجلة.</td>
-            </tr>
-            {% endfor %}
+          {% for task in all_tasks %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ task.title }}</td>
+            <td>{{ task.due_date|date:"Y-m-d"|default:"—" }}</td>
+            <td>
+              {% if task.status == 'pending' %}
+                <span class="badge badge-warning">معلقة</span>
+              {% elif task.status == 'completed' %}
+                <span class="badge badge-success">مكتملة</span>
+              {% elif task.status == 'overdue' %}
+                <span class="badge badge-danger">متأخرة</span>
+              {% endif %}
+            </td>
+            <td>
+              {{ task.assigned_to.get_full_name|default:task.assigned_to.username|default:"—" }}
+            </td>
+            <td>
+              {% if task.file_url %}
+                <a href="{{ task.file_url }}" target="_blank" class="btn btn-sm btn-outline-info">📎 عرض</a>
+              {% else %}
+                <span class="text-muted">لا يوجد</span>
+              {% endif %}
+            </td>
+            <td>
+              <select class="form-select update-status" data-task-id="{{ task.id }}">
+                <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>معلقة</option>
+                <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>مكتملة</option>
+                <option value="overdue" {% if task.status == 'overdue' %}selected{% endif %}>متأخرة</option>
+              </select>
+            </td>
+            <td>
+              {% if request.user.userprofile.role.name == 'admin' %}
+              <button class="btn btn-sm btn-outline-danger delete-task-btn" data-task-id="{{ task.id }}">🗑 حذف</button>
+              {% else %}
+              <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="empty-row">لا توجد مهام مسجلة.</td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
+      </table>
+    </div>
+  </div>
 </div>
 
-<!-- ✅ سكربت تغيير الحالة -->
+<!-- ✅ سكربت تغيير الحالة وحذف -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const csrfToken = '{{ csrf_token }}';
@@ -106,7 +106,6 @@
       });
     });
 
-    // ✅ حذف المهمة
     document.querySelectorAll('.delete-task-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
         const taskId = this.dataset.taskId;
@@ -135,4 +134,92 @@
     });
   });
 </script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+body {
+  background-color: #F0F4F8;
+  font-family: 'Tajawal', sans-serif;
+}
+
+.tasks-container {
+  display: flex;
+  justify-content: center;
+  padding-top: 80px;
+  padding-bottom: 40px;
+}
+
+.tasks-card {
+  background: #ffffff;
+  padding: 30px 25px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 1100px;
+  color: #2F4157;
+}
+
+.tasks-card h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.4rem;
+}
+
+.tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tasks-table th,
+.tasks-table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.tasks-table thead {
+  background-color: #EAF7FA;
+}
+
+.tasks-table tbody tr:hover {
+  background-color: #f5f9fc;
+}
+
+.badge {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-warning {
+  background-color: #ffeaa7;
+  color: #555;
+}
+
+.badge-success {
+  background-color: #55efc4;
+  color: #2d3436;
+}
+
+.badge-danger {
+  background-color: #ff7675;
+  color: #fff;
+}
+
+.empty-row {
+  text-align: center;
+  color: #777;
+  font-size: 0.95rem;
+}
+
+.form-select {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+</style>
 {% endblock %}

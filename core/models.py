@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from .role import Role  # استيراد الدور الجديد
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django import forms
+from django.contrib.auth.models import User
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -20,11 +23,16 @@ class UserProfile(models.Model):
         verbose_name_plural = 'ملفات المستخدمين'
 
 
-@login_required
-def profile_view(request):
-    profile = UserProfile.objects.select_related('role').get(user=request.user)
-    return render(request, 'core/profile.html', {
-        'role': profile.role.name if profile.role else 'غير محدد',
-        'phone': profile.phone_number,
-        'department': profile.department,
-    })
+# core/forms.py
+
+class StaffUserForm(forms.ModelForm):
+    full_name = forms.CharField(label="الاسم الكامل", max_length=150)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['role', 'phone_number', 'department']

@@ -3,64 +3,180 @@
 {% block title %}مهام العميل: {{ client.name }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">📋 مهام العميل: {{ client.name }}</h2>
-    <a href="{% url 'add_task_for_client' client.id %}" class="btn btn-primary">
-        + إضافة مهمة جديدة
-    </a>
-</div>
+<div class="tasks-container">
+  <div class="tasks-card">
+    <div class="header-row">
+      <h2>📋 مهام العميل: {{ client.name }}</h2>
+      <a href="{% url 'add_task_for_client' client.id %}" class="add-task-btn">+ إضافة مهمة جديدة</a>
+    </div>
 
-<table class="table table-bordered table-hover align-middle">
-    <thead class="table-light text-center">
+    <table class="tasks-table">
+      <thead>
         <tr>
-            <th>العنوان</th>
-            <th>الوصف</th>
-            <th>الموظف</th>
-            <th>الحالة</th>
-            <th>تاريخ الإنشاء</th>
-            <th>تاريخ التسليم</th>
-            <th>الملف</th>
-            <th>الإجراءات</th>
+          <th>العنوان</th>
+          <th>الوصف</th>
+          <th>الموظف</th>
+          <th>الحالة</th>
+          <th>تاريخ الإنشاء</th>
+          <th>تاريخ التسليم</th>
+          <th>الملف</th>
+          <th>الإجراءات</th>
         </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
         {% for task in tasks %}
-        <tr class="text-center">
-            <td>{{ task.title }}</td>
-            <td class="text-start">{{ task.description|truncatewords:10 }}</td>
-            <td>{{ task.assigned_to|default:"-" }}</td>
-            <td>
-                {% if task.status == 'pending' %}
-                    <span class="badge bg-warning text-dark">قيد التنفيذ</span>
-                {% elif task.status == 'completed' %}
-                    <span class="badge bg-success">منتهية</span>
-                {% elif task.status == 'overdue' %}
-                    <span class="badge bg-danger">متأخرة</span>
-                {% endif %}
-            </td>
-            <td>{{ task.created_at|date:"Y-m-d" }}</td>
-            <td>{{ task.due_date|default:"-" }}</td>
-            <td>
-                {% if task.file_url %}
-                    <a href="{{ task.file_url }}" target="_blank" class="btn btn-sm btn-outline-info">📄 عرض</a>
-                {% else %}
-                    -
-                {% endif %}
-            </td>
-            <td>
-                <form method="post" action="{% url 'delete_task' task.id %}" onsubmit="return confirm('هل أنت متأكد من حذف المهمة؟');">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-outline-danger" title="حذف المهمة">🗑 حذف</button>
-                </form>
-            </td>
+        <tr>
+          <td>{{ task.title }}</td>
+          <td class="desc-cell">{{ task.description|truncatewords:10 }}</td>
+          <td>{{ task.assigned_to|default:"-" }}</td>
+          <td>
+            {% if task.status == 'pending' %}
+              <span class="badge badge-warning">قيد التنفيذ</span>
+            {% elif task.status == 'completed' %}
+              <span class="badge badge-success">منتهية</span>
+            {% elif task.status == 'overdue' %}
+              <span class="badge badge-danger">متأخرة</span>
+            {% endif %}
+          </td>
+          <td>{{ task.created_at|date:"Y-m-d" }}</td>
+          <td>{{ task.due_date|default:"-" }}</td>
+          <td>
+            {% if task.file_url %}
+              <a href="{{ task.file_url }}" target="_blank" class="btn btn-sm btn-outline-info">📄 عرض</a>
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>
+            <form method="post" action="{% url 'delete_task' task.id %}" onsubmit="return confirm('هل أنت متأكد من حذف المهمة؟');">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger" title="حذف المهمة">🗑</button>
+            </form>
+          </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="8" class="text-center">لا توجد مهام لهذا العميل.</td>
+          <td colspan="8" class="empty-row">لا توجد مهام لهذا العميل.</td>
         </tr>
         {% endfor %}
-    </tbody>
-</table>
+      </tbody>
+    </table>
 
-<a href="{% url 'client_list' %}" class="btn btn-secondary mt-3">← رجوع لقائمة العملاء</a>
+    <a href="{% url 'client_list' %}" class="back-btn">← رجوع لقائمة العملاء</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+body {
+  background-color: #F0F4F8;
+  font-family: 'Tajawal', sans-serif;
+}
+
+.tasks-container {
+  display: flex;
+  justify-content: center;
+  padding-top: 80px;
+  padding-bottom: 40px;
+}
+
+.tasks-card {
+  background: #fff;
+  padding: 30px 25px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  max-width: 1000px;
+  width: 100%;
+  color: #2F4157;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.add-task-btn {
+  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.add-task-btn:hover {
+  opacity: 0.9;
+}
+
+.tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.tasks-table th,
+.tasks-table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.tasks-table thead {
+  background-color: #EAF7FA;
+}
+
+.tasks-table tbody tr:hover {
+  background-color: #f5f9fc;
+}
+
+.tasks-table .desc-cell {
+  text-align: start;
+}
+
+.badge {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-warning {
+  background-color: #ffeaa7;
+  color: #555;
+}
+
+.badge-success {
+  background-color: #55efc4;
+  color: #2d3436;
+}
+
+.badge-danger {
+  background-color: #ff7675;
+  color: #fff;
+}
+
+.empty-row {
+  text-align: center;
+  color: #777;
+  font-size: 0.95rem;
+}
+
+.back-btn {
+  background-color: #d9dfe4;
+  color: #333;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.back-btn:hover {
+  background-color: #c0c8cf;
+}
+</style>
 {% endblock %}

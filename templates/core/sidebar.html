@@ -1,57 +1,90 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
+    <h2>نظام الإدارة الداخلية</h2>
     <button onclick="toggleSidebar()" id="toggle-btn">⬅️</button>
   </div>
 
   <nav>
-    <a href="{% url 'admin_dashboard' %}">
-      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm10 8h8v-6h-8v6zM3 21h8v-6H3v6zm10-8h8V3h-8v10z"/></svg>
-      <span class="label">لوحة المدير</span>
-    </a>
+    {% if role == "staff" %}
+      <a href="{% url 'staff_dashboard' %}">
+        <svg class="nav-icon" viewBox="0 0 24 24">
+          <path d="M3 13h8V3H3v10zm10 8h8v-6h-8v6zM3 21h8v-6H3v6zm10-8h8V3h-8v10z"/>
+        </svg>
+        <span class="label">لوحة الموظف</span>
+      </a>
+    {% else %}
+      <a href="{% url 'admin_dashboard' %}">
+        <svg class="nav-icon" viewBox="0 0 24 24">
+          <path d="M3 13h8V3H3v10zm10 8h8v-6h-8v6zM3 21h8v-6H3v6zm10-8h8V3h-8v10z"/>
+        </svg>
+        <span class="label">لوحة المدير</span>
+      </a>
+    {% endif %}
 
-    <a href="{% url 'add_staff' %}">
-      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14"/></svg>
-      <span class="label">إضافة موظف</span>
-    </a>
+    {% if role == "admin" %}
+      <a href="{% url 'add_staff' %}">
+        <svg class="nav-icon" viewBox="0 0 24 24">
+          <path d="M12 5v14m-7-7h14"/>
+        </svg>
+        <span class="label">إضافة موظف</span>
+      </a>
 
-    <a href="{% url 'add_task' %}">
-      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14"/></svg>
-      <span class="label">إضافة مهمة</span>
-    </a>
+      <a href="{% url 'add_task' %}">
+        <svg class="nav-icon" viewBox="0 0 24 24">
+          <path d="M12 5v14m-7-7h14"/>
+        </svg>
+        <span class="label">إضافة مهمة</span>
+      </a>
+    {% endif %}
 
     <a href="{% url 'client_list' %}">
-      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zm-4 6c-4 0-8 2-8 4v1h16v-1c0-2-4-4-8-4z"/></svg>
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zm-4 6c-4 0-8 2-8 4v1h16v-1c0-2-4-4-8-4z"/>
+      </svg>
       <span class="label">العملاء</span>
     </a>
 
     <a href="{% url 'task_list' %}">
-      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M3 6h18M3 12h18M3 18h18"/>
+      </svg>
       <span class="label">المهام</span>
     </a>
 
-    <a href="{% url 'reports' %}">
-      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 3v18h18V3H3zm2 2h14v14H5V5z"/></svg>
-      <span class="label">التقارير</span>
-    </a>
+    {% if role == "admin" %}
+      <a href="{% url 'reports' %}">
+        <svg class="nav-icon" viewBox="0 0 24 24">
+          <path d="M3 3v18h18V3H3zm2 2h14v14H5V5z"/>
+        </svg>
+        <span class="label">التقارير</span>
+      </a>
+    {% endif %}
 
     <a href="{% url 'document_list' %}">
-      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/></svg>
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M6 2h9l5 5v15H6z"/>
+      </svg>
       <span class="label">المستندات</span>
     </a>
 
     <hr />
 
     <a href="{% url 'profile' %}">
-      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/></svg>
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/>
+      </svg>
       <span class="label">حسابي</span>
     </a>
 
     <a href="{% url 'logout' %}" class="logout">
-      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 17l5-5-5-5M21 12H9M13 3h-2a9 9 0 0 0 0 18h2"/></svg>
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <path d="M16 17l5-5-5-5M21 12H9M13 3h-2a9 9 0 0 0 0 18h2"/>
+      </svg>
       <span class="label">تسجيل الخروج</span>
     </a>
   </nav>
 </aside>
+
 
 <style>
 /* 🟪 السايدبار */
@@ -142,3 +175,9 @@ hr {
   margin: 12px 0;
 }
 </style>
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    sidebar.classList.toggle("collapsed");
+  }
+</script>

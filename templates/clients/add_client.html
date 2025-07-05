@@ -3,12 +3,112 @@
 {% block title %}إضافة عميل جديد{% endblock %}
 
 {% block content %}
-<h2>إضافة عميل جديد</h2>
+<div class="add-client-container">
+  <div class="add-client-card">
+    <h2>➕ إضافة عميل جديد</h2>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">حفظ</button>
-    <a href="{% url 'client_list' %}" class="btn btn-secondary">إلغاء</a>
-</form>
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="form-fields">
+        {{ form.as_p }}
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" class="submit-btn">💾 حفظ</button>
+        <a href="{% url 'client_list' %}" class="cancel-btn">↩️ إلغاء</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+body {
+  background-color: #F0F4F8;
+  font-family: 'Tajawal', sans-serif;
+}
+
+.add-client-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 80px;
+  padding-bottom: 40px;
+}
+
+.add-client-card {
+  background: #ffffff;
+  padding: 30px 25px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  max-width: 500px;
+  width: 100%;
+  color: #2F4157;
+}
+
+.add-client-card h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.4rem;
+  color: #2F4157;
+}
+
+.form-fields p {
+  margin-bottom: 15px;
+}
+
+.form-fields label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #2F4157;
+}
+
+.form-fields input,
+.form-fields textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #8EBABF;
+  border-radius: 6px;
+  font-size: 15px;
+  background-color: #F9FBFC;
+}
+
+.btn-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
+  color: white;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.submit-btn:hover {
+  opacity: 0.9;
+}
+
+.cancel-btn {
+  background-color: #d9dfe4;
+  color: #333;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.cancel-btn:hover {
+  background-color: #c0c8cf;
+}
+</style>
 {% endblock %}

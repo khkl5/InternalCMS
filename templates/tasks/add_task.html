@@ -2,47 +2,115 @@
 {% load static %}
 
 {% block content %}
-<div class="dashboard">
-  {% include 'core/sidebar.html' %}
-  <div class="main-content">
-    {% include 'header.html' %}
-
+<div class="add-task-container">
+  <div class="add-task-card">
     <h2>📝 إضافة مهمة جديدة</h2>
 
-    <div class="form-card">
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="submit-btn">إنشاء المهمة</button>
-      </form>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
 
-      {% if messages %}
-        <ul class="messages">
-          {% for message in messages %}
-            <li>{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    </div>
+      <div class="form-fields">
+        {{ form.as_p }}
+      </div>
+
+      <button type="submit" class="submit-btn">إنشاء المهمة</button>
+    </form>
+
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
   </div>
 </div>
+{% endblock %}
 
+{% block extra_css %}
 <style>
-.form-card {
-    background: #C6E5EA;
-    padding: 30px;
-    border-radius: 10px;
-    max-width: 600px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+body {
+  background-color: #F0F4F8;
+  font-family: 'Tajawal', sans-serif;
 }
+
+.add-task-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 80px;
+  padding-bottom: 40px;
+}
+
+.add-task-card {
+  background: #ffffff;
+  padding: 30px 25px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  max-width: 600px;
+  width: 100%;
+  color: #2F4157;
+}
+
+.add-task-card h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.4rem;
+  color: #2F4157;
+}
+
+.form-fields p {
+  margin-bottom: 15px;
+}
+
+.form-fields label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #2F4157;
+}
+
+.form-fields input,
+.form-fields select,
+.form-fields textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #8EBABF;
+  border-radius: 6px;
+  font-size: 15px;
+  background-color: #F9FBFC;
+}
+
 .submit-btn {
-    background-color: #08748C;
-    color: white;
-    border: none;
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 6px;
-    cursor: pointer;
+  width: 100%;
+  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+  margin-top: 10px;
+}
+
+.submit-btn:hover {
+  opacity: 0.9;
+}
+
+.messages {
+  margin-top: 20px;
+  list-style: none;
+  padding: 0;
+  text-align: center;
+}
+
+.messages li {
+  background: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 5px;
 }
 </style>
 {% endblock %}
