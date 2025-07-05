@@ -7,35 +7,32 @@
   <p class="section-subtitle">دورك: {{ role }}</p>
 
   <div class="cards-grid">
-    {% if total_tasks %}
-      <div class="report-card gradient-green">
-        <h5>عدد المهام</h5>
-        <p>{{ total_tasks }}</p>
-      </div>
 
-      <div class="report-card gradient-purple">
-        <h5>قيد الانتظار</h5>
-        <p>{{ tasks_pending }}</p>
-      </div>
+    <div class="report-card gradient-green">
+      <h5>إجمالي المهام</h5>
+      <p>{{ total_tasks }}</p>
+    </div>
 
-      <div class="report-card gradient-blue">
-        <h5>المهام المكتملة</h5>
-        <p>{{ tasks_completed }}</p>
-      </div>
-    {% endif %}
+    <div class="report-card gradient-purple">
+      <h5>المهام المكتملة</h5>
+      <p>{{ tasks_completed }}</p>
+    </div>
 
-    {% if total_documents %}
-      <div class="report-card gradient-pink">
-        <h5>الملفات</h5>
-        <p>{{ total_documents }}</p>
-      </div>
-    {% endif %}
+    <div class="report-card gradient-blue">
+      <h5>عدد المستندات</h5>
+      <p>{{ total_documents }}</p>
+    </div>
 
-    {% if latest_tasks %}
-      <div class="report-card white-card task-preview-card span-2">
-        <h5 style="color:#2F4157;">📌 أحدث المهام المسندة إليك</h5>
-        <ul class="task-list">
-          {% for task in latest_tasks|slice:":3" %}
+    <div class="report-card gradient-pink">
+      <h5>عدد العملاء</h5>
+      <p>{{ total_clients }}</p>
+    </div>
+
+    <div class="report-card white-card task-preview-card span-2">
+      <h5>📌 أحدث المهام المسندة إليك</h5>
+      <ul class="task-list">
+        {% if latest_tasks %}
+          {% for task in latest_tasks %}
             <li class="task-item">
               <div class="task-title">
                 <a href="{% url 'task_detail' task.id %}">📎 {{ task.title }}</a>
@@ -53,9 +50,12 @@
               </div>
             </li>
           {% endfor %}
-        </ul>
-      </div>
-    {% endif %}
+        {% else %}
+          <li class="task-item">لا توجد مهام حالياً</li>
+        {% endif %}
+      </ul>
+    </div>
+
   </div>
 </div>
 {% endblock %}

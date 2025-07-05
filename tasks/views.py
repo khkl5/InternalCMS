@@ -168,11 +168,22 @@ def staff_dashboard_view(request):
     user = request.user
     role = user.userprofile.role.name
 
-    total_tasks = Task.objects.filter(assigned_to=user).count()
+    tasks = Task.objects.filter(assigned_to=user)
+    total_tasks = tasks.count()
+    tasks_completed = tasks.filter(status='completed').count()
+    tasks_pending = tasks.exclude(status='completed').count()
+
     total_documents = Document.objects.filter(uploaded_by=user).count()
+    total_clients = Client.objects.filter(assigned_to=user).count()
+
+    latest_tasks = tasks.order_by('-created_at')[:3]
 
     return render(request, 'core/staff_dashboard.html', {
         'role': role,
         'total_tasks': total_tasks,
+        'tasks_completed': tasks_completed,
+        'tasks_pending': tasks_pending,
         'total_documents': total_documents,
+        'total_clients': total_clients,
+        'latest_tasks': latest_tasks,
     })

@@ -37,7 +37,11 @@
               {% endif %}
             </td>
             <td>
-              {{ task.assigned_to.get_full_name|default:task.assigned_to.username|default:"—" }}
+              {% if task.assigned_to %}
+                {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
+              {% else %}
+                —
+              {% endif %}
             </td>
             <td>
               {% if task.file_url %}
@@ -55,9 +59,9 @@
             </td>
             <td>
               {% if request.user.userprofile.role.name == 'admin' %}
-              <button class="btn btn-sm btn-outline-danger delete-task-btn" data-task-id="{{ task.id }}">🗑 حذف</button>
+                <button class="btn btn-sm btn-outline-danger delete-task-btn" data-task-id="{{ task.id }}">🗑 حذف</button>
               {% else %}
-              <span class="text-muted">—</span>
+                <span class="text-muted">—</span>
               {% endif %}
             </td>
           </tr>
