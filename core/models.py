@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from .role import Role  # استيراد الدور الجديد
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -16,3 +18,13 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = 'ملف المستخدم'
         verbose_name_plural = 'ملفات المستخدمين'
+
+
+@login_required
+def profile_view(request):
+    profile = UserProfile.objects.select_related('role').get(user=request.user)
+    return render(request, 'core/profile.html', {
+        'role': profile.role.name if profile.role else 'غير محدد',
+        'phone': profile.phone_number,
+        'department': profile.department,
+    })

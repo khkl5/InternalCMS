@@ -1,70 +1,110 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ملفي الشخصي</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #F2F2F2;
-            color: #054159;
-            padding: 20px;
-        }
+{% extends 'base.html' %}
+{% load static %}
 
-        .profile-card {
-            background-color: #C6E5EA;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 500px;
-            margin: auto;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        .profile-card h2 {
-            color: #054159;
-            margin-bottom: 15px;
-        }
-
-        .profile-card p {
-            margin: 8px 0;
-        }
-    </style>
-</head>
-<body>
-
-    {% include 'header.html' %}
-
-    <div class="profile-card">
-        <h2>الملف الشخصي</h2>
-        <p id="profile-email">البريد الإلكتروني: ...</p>
-        <p id="profile-role">الدور: ...</p>
+{% block content %}
+<div class="profile-container">
+  <div class="profile-card">
+    <div class="profile-avatar">
+      <span>{{ request.user.first_name|first|upper }}</span>
     </div>
+    <h2>{{ request.user.get_full_name }}</h2>
+    <p class="role">{{ role }}</p>
+    <p class="phone">📞 رقم الجوال: {{ phone|default:"غير مسجل" }}</p>
+    <p class="department">🏢 القسم: {{ department|default:"غير محدد" }}</p>
 
-    {% include 'footer.html' %}
 
-    <!-- Supabase Session Check -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    <script>
-        const supabase = supabase.createClient('https://xxx.supabase.co', 'public-anon-key');
+    <a href="#" class="edit-btn" title="لاحقًا لإجراء تعديل">✏️ تعديل الملف الشخصي</a>
+    <a href="{% url 'password_change' %}" class="password-btn">🔒 تغيير كلمة المرور</a>
 
-        async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
+  </div>
+</div>
+{% endblock %}
 
-            if (!session) {
-                window.location.href = '/login/';
-            } else {
-                // جلب بيانات المستخدم
-                const user = session.user;
-                document.getElementById('profile-email').textContent = 'البريد الإلكتروني: ' + user.email;
-                // لاحقًا ممكن تجيب الدور (role) من UserProfile لو عندك
-                document.getElementById('profile-role').textContent = 'الدور: قيد التحميل...';
-            }
-        }
+{% block extra_css %}
+<style>
+body {
+  background-color: #F0F4F8;
+  font-family: 'Tajawal', sans-serif;
+}
 
-        checkAuth();
-    </script>
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 100px;
+  padding-bottom: 40px;
+}
 
-</body>
-</html>
+.profile-card {
+  background: #ffffff;
+  padding: 30px 25px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  color: #2F4157;
+}
+
+.profile-avatar {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 15px;
+  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-card h2 {
+  font-size: 1.4rem;
+  margin: 10px 0 5px;
+}
+
+.role {
+  color: #8C9AA9;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+
+.email {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.edit-btn {
+  display: inline-block;
+  margin-top: 15px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: #2EC6F3;
+  transition: color 0.3s;
+}
+
+.edit-btn:hover {
+  color: #199ec2;
+}
+.password-btn {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: #EA5455;
+  transition: color 0.3s;
+}
+
+.password-btn:hover {
+  color: #c03a3b;
+}
+.phone, .department {
+  font-size: 0.95rem;
+  color: #555;
+  margin-top: 4px;
+}
+
+</style>
+{% endblock %}
