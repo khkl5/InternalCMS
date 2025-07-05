@@ -2,190 +2,189 @@
 {% load static %}
 
 {% block content %}
-<div class="dashboard">
-  <h2 class="dashboard-title">مرحبًا {{ request.user.username }}</h2>
-  <p class="dashboard-role">دورك: {{ role }}</p>
+<div class="reports-container">
+  <h2 class="section-title">👋 مرحبًا {{ request.user.get_full_name }}</h2>
+  <p class="section-subtitle">دورك: {{ role }}</p>
 
-  <div class="stats-grid">
+  <div class="cards-grid">
     {% if total_tasks %}
-      <div class="stat-card">
-        <div class="icon-box tasks"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/></svg></div>
-        <div class="stat-info">
-          <span class="stat-title">عدد المهام</span>
-          <span class="stat-value">{{ total_tasks }}</span>
-        </div>
+      <div class="report-card gradient-green">
+        <h5>عدد المهام</h5>
+        <p>{{ total_tasks }}</p>
       </div>
 
-      <div class="stat-card">
-        <div class="icon-box pending"><svg viewBox="0 0 24 24"><path d="M12 7v5l3 3M12 1a11 11 0 1 0 11 11A11 11 0 0 0 12 1z"/></svg></div>
-        <div class="stat-info">
-          <span class="stat-title">قيد الانتظار</span>
-          <span class="stat-value">{{ tasks_pending }}</span>
-        </div>
+      <div class="report-card gradient-purple">
+        <h5>قيد الانتظار</h5>
+        <p>{{ tasks_pending }}</p>
       </div>
 
-      <div class="stat-card">
-        <div class="icon-box completed"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
-        <div class="stat-info">
-          <span class="stat-title">المكتملة</span>
-          <span class="stat-value">{{ tasks_completed }}</span>
-        </div>
+      <div class="report-card gradient-blue">
+        <h5>المهام المكتملة</h5>
+        <p>{{ tasks_completed }}</p>
       </div>
     {% endif %}
 
     {% if total_documents %}
-      <div class="stat-card">
-        <div class="icon-box files"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/></svg></div>
-        <div class="stat-info">
-          <span class="stat-title">الملفات</span>
-          <span class="stat-value">{{ total_documents }}</span>
-        </div>
+      <div class="report-card gradient-pink">
+        <h5>الملفات</h5>
+        <p>{{ total_documents }}</p>
+      </div>
+    {% endif %}
+
+    {% if latest_tasks %}
+      <div class="report-card white-card task-preview-card span-2">
+        <h5 style="color:#2F4157;">📌 أحدث المهام المسندة إليك</h5>
+        <ul class="task-list">
+          {% for task in latest_tasks|slice:":3" %}
+            <li class="task-item">
+              <div class="task-title">
+                <a href="{% url 'task_detail' task.id %}">📎 {{ task.title }}</a>
+              </div>
+              <div class="task-status">
+                {% if task.status == 'pending' %}
+                  <span class="status status-pending">⏳ قيد التنفيذ</span>
+                {% elif task.status == 'completed' %}
+                  <span class="status status-completed">✅ منتهية</span>
+                {% elif task.status == 'overdue' %}
+                  <span class="status status-overdue">⏰ متأخرة</span>
+                {% else %}
+                  <span class="status">❓ غير معروفة</span>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
       </div>
     {% endif %}
   </div>
-
-  {% if latest_tasks %}
-    <h3 class="latest-tasks-title">📌 أحدث المهام المسندة إليك</h3>
-    <ul class="task-list">
-      {% for task in latest_tasks %}
-        <li class="task-item">
-          <div class="task-title">
-            <a href="{% url 'task_detail' task.id %}">📎 {{ task.title }}</a>
-          </div>
-          <div class="task-status">
-            {% if task.status == 'pending' %}
-              <span class="status status-pending">⏳ قيد التنفيذ</span>
-            {% elif task.status == 'completed' %}
-              <span class="status status-completed">✅ منتهية</span>
-            {% elif task.status == 'overdue' %}
-              <span class="status status-overdue">⏰ متأخرة</span>
-            {% else %}
-              <span class="status">❓ غير معروفة</span>
-            {% endif %}
-          </div>
-        </li>
-      {% empty %}
-        <li>لا توجد مهام حالياً.</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_css %}
-<!-- نعيد استخدام نفس الـ CSS من admin_dashboard.html بدون تعديل -->
 <style>
-/* نفس التنسيق الموجود مسبقًا في admin_dashboard.html */
-.dashboard {
-  padding: 30px;
+body {
+  background-color: #F0F4F8;
   font-family: 'Tajawal', sans-serif;
 }
-.dashboard-title {
-  font-size: 1.8rem;
-  color: #2F4157;
-  margin-bottom: 10px;
+
+.reports-container {
+  padding: 50px 30px;
+  max-width: 1100px;
+  margin: auto;
 }
-.dashboard-role {
+
+.section-title {
+  font-size: 1.6rem;
+  color: #2F4157;
+  margin-bottom: 5px;
+  text-align: center;
+}
+.section-subtitle {
   font-size: 1rem;
   color: #666;
   margin-bottom: 30px;
+  text-align: center;
 }
-.stats-grid {
+
+.cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 20px;
+  margin-bottom: 40px;
+  align-items: stretch;
 }
-.stat-card {
-  background: #fff;
+
+.report-card {
   border-radius: 16px;
-  padding: 20px;
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  transition: transform 0.3s ease;
-}
-.stat-card:hover {
-  transform: translateY(-4px);
-}
-.icon-box {
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.icon-box svg {
-  width: 24px;
-  height: 24px;
-  fill: white;
-}
-.icon-box.tasks { background: #5A8DEE; }
-.icon-box.pending { background: #FFB400; }
-.icon-box.completed { background: #28C76F; }
-.icon-box.files { background: #7367F0; }
-.stat-info {
+  padding: 25px 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  min-height: 150px;
+  text-align: right;
 }
-.stat-title {
-  font-size: 0.9rem;
-  color: #888;
+
+.report-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
-.stat-value {
-  font-size: 1.5rem;
+
+.report-card h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.report-card p {
+  font-size: 1.8rem;
   font-weight: bold;
+  margin: 0;
+  color: #fff;
+}
+
+.gradient-blue    { background: linear-gradient(135deg, #36D1DC, #5B86E5); }
+.gradient-green   { background: linear-gradient(135deg, #4CB8C4, #3CD3AD); }
+.gradient-purple  { background: linear-gradient(135deg, #A770EF, #FDB99B); }
+.gradient-pink    { background: linear-gradient(135deg, #F857A6, #FF5858); }
+
+.white-card {
+  background: #ffffff !important;
+  color: #2F4157 !important;
+  text-align: right;
+}
+
+.task-preview-card h5 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
   color: #2F4157;
 }
-.latest-tasks-title {
-  margin-top: 40px;
-  margin-bottom: 15px;
-  font-size: 1.4rem;
-  color: #2F4157;
-}
+
 .task-list {
-  background: #f9f9f9;
-  border-radius: 10px;
-  padding: 15px;
-  margin-top: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: right;
 }
+
 .task-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  margin-bottom: 8px;
+  padding: 8px 0;
   border-bottom: 1px solid #e0e0e0;
+  font-size: 0.9rem;
 }
+
 .task-title a {
-  font-weight: bold;
+  font-weight: 500;
+  color: #2F4157;
   text-decoration: none;
-  color: #333;
-  transition: color 0.3s;
 }
-.task-title a:hover {
-  color: #007bff;
+
+.task-status .status {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #eee;
+  color: #2F4157;
 }
-.status {
-  font-weight: 600;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 14px;
+
+.status-pending   { background: #FFF3CD; color: #856404; }
+.status-completed { background: #D4EDDA; color: #155724; }
+.status-overdue   { background: #F8D7DA; color: #721C24; }
+
+.span-2 {
+  grid-column: span 2;
 }
-.status-pending {
-  background-color: #fff3cd;
-  color: #856404;
-}
-.status-completed {
-  background-color: #d4edda;
-  color: #155724;
-}
-.status-overdue {
-  background-color: #f8d7da;
-  color: #721c24;
+@media (max-width: 768px) {
+  .span-2 {
+    grid-column: span 1;
+  }
 }
 </style>
 {% endblock %}

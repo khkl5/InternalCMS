@@ -10,6 +10,7 @@ class AddStaffForm(forms.ModelForm):
     email = forms.EmailField()
     phone_number = forms.CharField(max_length=20, required=False)
     department = forms.CharField(max_length=100, required=False)
+    full_name = forms.CharField(label="الاسم الكامل", max_length=150)
 
     class Meta:
         model = UserProfile
@@ -28,11 +29,18 @@ class AddStaffForm(forms.ModelForm):
         return email
 
     def save(self, commit=True):
+        # معالجة الاسم الكامل
+        full_name = self.cleaned_data['full_name']
+        first_name = full_name.split()[0]
+        last_name = ' '.join(full_name.split()[1:]) if len(full_name.split()) > 1 else ''
+
         # إنشاء المستخدم
         user = User.objects.create_user(
             username=self.cleaned_data['username'],
             password=self.cleaned_data['password'],
             email=self.cleaned_data['email'],
+            first_name=first_name,
+            last_name=last_name,
         )
 
         # تحديد الدور

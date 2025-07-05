@@ -3,94 +3,191 @@
 {% block title %}قائمة المستندات{% endblock %}
 
 {% block content %}
-
-<h2 class="section-title">جميع المستندات</h2>
-
-{% if role == 'staff' %}
-    <div class="text-end mb-3">
-        <a href="{% url 'upload_document' %}" class="btn btn-success">🔼 رفع مستند جديد</a>
+<div class="documents-container">
+  <div class="documents-card">
+    
+    <div class="header-row">
+      <h2>📄 قائمة المستندات</h2>
+      {% if role == 'staff' %}
+        <a href="{% url 'upload_document' %}" class="add-doc-btn">+ رفع مستند جديد</a>
+      {% endif %}
     </div>
-{% endif %}
 
 <!-- البحث -->
-<form method="get" class="mb-3 text-end">
-    <input type="text" name="q" value="{{ query }}" placeholder="ابحث عن عنوان المستند..." class="form-control" style="max-width: 300px; display: inline-block;">
+<form method="get" class="text-end mb-3">
+  <div style="display: inline-flex; gap: 8px;">
+    <input type="text" name="q" value="{{ query }}" placeholder="ابحث عن عنوان المستند..." class="form-control" style="max-width: 280px;">
     <button type="submit" class="btn btn-primary">بحث</button>
+  </div>
 </form>
 
-<!-- أزرار التصدير -->
-<div class="mb-3 text-end">
-    <a href="#" class="btn btn-secondary">تصدير PDF</a>
-    <a href="#" class="btn btn-success">تصدير Excel</a>
-</div>
+    <!-- أزرار التصدير -->
+    <div class="export-buttons">
+      <a href="#" class="btn btn-outline-secondary">📄 تصدير PDF</a>
+      <a href="#" class="btn btn-outline-success">📊 تصدير Excel</a>
+    </div>
 
-<div class="table-responsive">
-    <table class="table table-bordered text-center align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>م</th>
-                <th>العنوان</th>
-                <th>العميل</th>
-                <th>تم الرفع بواسطة</th>
-                <th>الوصول</th>
-                <th>عرض</th>
-                <th>تحميل</th>
-                <th>تاريخ الإنشاء</th>
-                {% if role == 'admin' %}
-                    <th>حذف</th>
-                {% endif %}
-            </tr>
+    <!-- الجدول -->
+    <div class="table-wrapper">
+      <table class="documents-table">
+        <thead>
+          <tr>
+            <th>م</th>
+            <th>العنوان</th>
+            <th>العميل</th>
+            <th>تم الرفع بواسطة</th>
+            <th>الوصول</th>
+            <th>عرض</th>
+            <th>تحميل</th>
+            <th>تاريخ الإنشاء</th>
+            {% if role == 'admin' %}
+              <th>حذف</th>
+            {% endif %}
+          </tr>
         </thead>
         <tbody>
-            {% for doc in documents %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ doc.title }}</td>
-                <td>{{ doc.client|default:"—" }}</td>
-                <td>{{ doc.uploaded_by|default:"—" }}</td>
-                <td>{{ doc.get_access_level_display }}</td>
-
-                <!-- عرض الملف -->
-                <td>
-                    {% if doc.can_download and doc.file_url %}
-                        {% if doc.is_image %}
-                            <a href="{{ doc.file_url }}" class="btn btn-outline-info btn-sm" target="_blank">عرض</a>
-                        {% elif doc.is_pdf %}
-                            <a href="{{ doc.file_url }}" class="btn btn-outline-info btn-sm" target="_blank">عرض PDF</a>
-                        {% else %}
-                            <span class="text-muted">لا يمكن عرض هذا النوع</span>
-                        {% endif %}
-                    {% else %}
-                        <span class="text-muted">غير مصرح</span>
-                    {% endif %}
-                </td>
-
-                <!-- تحميل الملف -->
-                <td>
-                    {% if doc.can_download and doc.file_url %}
-                        <a href="{{ doc.file_url }}" download class="btn btn-outline-primary btn-sm">تحميل</a>
-                    {% else %}
-                        <span class="text-muted">غير مصرح</span>
-                    {% endif %}
-                </td>
-
-                <td>{{ doc.created_at|date:"Y-m-d" }}</td>
-
-                {% if role == 'admin' %}
-                <!-- زر الحذف -->
-                <td>
-                    <form method="post" action="{% url 'delete_document' document_id=doc.id %}" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm">🗑 حذف</button>
-                    </form>
-                </td>
+          {% for doc in documents %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ doc.title }}</td>
+            <td>{{ doc.client|default:"—" }}</td>
+            <td>{{ doc.uploaded_by|default:"—" }}</td>
+            <td>{{ doc.get_access_level_display }}</td>
+            <td>
+              {% if doc.can_download and doc.file_url %}
+                {% if doc.is_image %}
+                  <a href="{{ doc.file_url }}" target="_blank" class="btn btn-outline-info btn-sm">عرض</a>
+                {% elif doc.is_pdf %}
+                  <a href="{{ doc.file_url }}" target="_blank" class="btn btn-outline-info btn-sm">عرض PDF</a>
+                {% else %}
+                  <span class="text-muted">غير مدعوم</span>
                 {% endif %}
-            </tr>
-            {% empty %}
-            <tr><td colspan="9">لا توجد مستندات حالياً.</td></tr>
-            {% endfor %}
+              {% else %}
+                <span class="text-muted">غير مصرح</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if doc.can_download and doc.file_url %}
+                <a href="{{ doc.file_url }}" download class="btn btn-outline-primary btn-sm">تحميل</a>
+              {% else %}
+                <span class="text-muted">غير مصرح</span>
+              {% endif %}
+            </td>
+            <td>{{ doc.created_at|date:"Y-m-d" }}</td>
+            {% if role == 'admin' %}
+            <td>
+              <form method="post" action="{% url 'delete_document' document_id=doc.id %}" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">🗑</button>
+              </form>
+            </td>
+            {% endif %}
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="empty-row">لا توجد مستندات حالياً.</td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
-</div>
+      </table>
+    </div>
 
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+body {
+  background-color: #F0F4F8;
+  font-family: 'Tajawal', sans-serif;
+}
+
+.documents-container {
+  display: flex;
+  justify-content: center;
+  padding-top: 80px;
+  padding-bottom: 40px;
+}
+
+.documents-card {
+  background: #ffffff;
+  padding: 30px 25px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 1000px;
+  color: #2F4157;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.add-doc-btn {
+  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background 0.3s;
+}
+
+.add-doc-btn:hover {
+  opacity: 0.9;
+}
+
+.search-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  max-width: 300px;
+  display: inline-block;
+}
+
+.export-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.documents-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.documents-table th,
+.documents-table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.documents-table thead {
+  background-color: #EAF7FA;
+}
+
+.documents-table tbody tr:hover {
+  background-color: #f5f9fc;
+}
+
+.empty-row {
+  text-align: center;
+  color: #777;
+  font-size: 0.95rem;
+}
+</style>
 {% endblock %}
