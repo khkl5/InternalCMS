@@ -1,18 +1,28 @@
 from django.urls import path
 from . import views
 from .views import dashboard_view
-
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', views.dashboard_view, name='dashboard'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-    path('admin-dashboard/', dashboard_view, name='admin_dashboard'),
+
+    # تغيير كلمة المرور باستخدام الواجهة المخصصة
+    path(
+        'password_change/',
+        auth_views.PasswordChangeView.as_view(template_name='core/change_password.html'),
+        name='password_change'
+    ),
+    path(
+        'password_change/done/',
+        auth_views.PasswordChangeDoneView.as_view(template_name='core/change_password_done.html'),
+        name='password_change_done'
+    ),
 
     # لوحات التحكم
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('staff-dashboard/', views.staff_dashboard, name='staff_dashboard'),
-    
 
     # صفحات عامة
     path('profile/', views.profile_view, name='profile'),
