@@ -13,23 +13,25 @@
 
     <a href="{% url 'task_list' %}" class="report-card gradient-purple card-link">
       <h5>المهام المكتملة</h5>
-      <p>{{ tasks_completed }}</p>
+      <p>{{ tasks_completed|default:"0" }}</p>
+
     </a>
 
-    <div class="report-card gradient-blue">
+    <a href="{% url 'document_list' %}" class="report-card gradient-blue card-link">
       <h5>عدد المستندات</h5>
       <p>{{ total_documents }}</p>
-    </div>
+    </a>
 
-    <div class="report-card gradient-pink">
+
+    <a href="{% url 'client_list' %}" class="report-card gradient-pink card-link">
       <h5>عدد العملاء</h5>
       <p>{{ total_clients }}</p>
-    </div>
+    </a>
 
-    {% if latest_tasks %}
-      <div class="report-card white-card task-preview-card span-2">
-        <h5 style="color:#2F4157;">📌 أحدث المهام</h5>
-        <ul class="task-list">
+    <div class="report-card white-card task-preview-card span-2">
+      <h5 style="color:#2F4157;">📌 أحدث المهام</h5>
+      <ul class="task-list">
+        {% if latest_tasks %}
           {% for task in latest_tasks|slice:":3" %}
             <li class="task-item">
               <div class="task-title">
@@ -46,9 +48,13 @@
               </div>
             </li>
           {% endfor %}
-        </ul>
-      </div>
-    {% endif %}
+        {% else %}
+          <li class="task-item" style="justify-content: center; color: #9ba9bb;">
+            لا توجد مهام حتى الآن.
+          </li>
+        {% endif %}
+      </ul>
+    </div>
   </div>
 </div>
 {% endblock %}

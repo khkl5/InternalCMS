@@ -12,10 +12,7 @@
     <p class="phone">📞 رقم الجوال: {{ phone|default:"غير مسجل" }}</p>
     <p class="department">🏢 القسم: {{ department|default:"غير محدد" }}</p>
 
-
-    <a href="#" class="edit-btn" title="لاحقًا لإجراء تعديل">✏️ تعديل الملف الشخصي</a>
     <a href="{% url 'password_change' %}" class="password-btn">🔒 تغيير كلمة المرور</a>
-
   </div>
 </div>
 {% endblock %}

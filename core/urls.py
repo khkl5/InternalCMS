@@ -2,11 +2,16 @@ from django.urls import path
 from . import views
 from .views import dashboard_view
 from django.contrib.auth import views as auth_views
+from core.views import staff_list_view
 
 urlpatterns = [
     path('', views.dashboard_view, name='dashboard'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('staff/', views.staff_list_view, name='staff_list'),
+    path('staff/delete/<int:staff_id>/', views.delete_staff_view, name='delete_staff'),
+    path('staff/edit/<int:user_id>/', views.edit_staff_view, name='edit_staff'),
+
 
     # تغيير كلمة المرور باستخدام الواجهة المخصصة
     path(

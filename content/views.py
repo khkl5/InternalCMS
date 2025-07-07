@@ -23,24 +23,27 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def document_list_view(request):
-    role = getattr(request.user.userprofile.role, 'name', None)
+    user = request.user
+    role = getattr(user.userprofile.role, 'name', None)
 
+    # جلب المستندات حسب الدور
     if role == 'admin':
         documents = Document.objects.all()
     elif role == 'staff':
-        documents = Document.objects.filter(uploaded_by=request.user)
+        documents = Document.objects.filter(uploaded_by=user)
     else:
         documents = Document.objects.filter(access_level__in=['public', 'restricted'])
 
-    query = request.GET.get('q')
+    # دعم البحث
+    query = request.GET.get('q', '')
     if query:
         documents = documents.filter(title__icontains=query)
 
-    # إعداد صلاحيات التحميل ونوع الملف
+    # تجهيز خصائص العرض/التحميل
     for doc in documents:
         doc.can_download = (
             role == 'admin' or
-            (role == 'staff' and doc.uploaded_by == request.user) or
+            (role == 'staff' and doc.uploaded_by == user) or
             (role == 'viewer' and doc.access_level in ['public', 'restricted'])
         )
         if doc.file_url:
@@ -51,12 +54,13 @@ def document_list_view(request):
             doc.is_image = False
             doc.is_pdf = False
 
+    # إرسال جميع المتغيرات الضرورية
     return render(request, 'content/document_list.html', {
         'documents': documents,
         'role': role,
-        'query': query or '',
+        'is_admin': role == 'admin',   # <-- أضف هذا فقط
+        'query': query,
     })
-
 
 # حذف مستند (للمشرف فقط)
 @login_required
@@ -103,7 +107,8 @@ logger = logging.getLogger(__name__)  # لتسجيل الأخطاء
 def upload_document_view(request):
     role = getattr(request.user.userprofile.role, 'name', None)
 
-    if role != 'staff':
+    # السماح فقط للمدير أو الموظف
+    if role not in ['admin', 'staff']:
         return render(request, '403.html', status=403)
 
     if request.method == 'POST':
@@ -124,7 +129,6 @@ def upload_document_view(request):
                 )
 
                 if hasattr(upload_response, "error") and upload_response.error:
-
                     messages.error(request, "فشل رفع الملف إلى Supabase.")
                     logger.error("Upload error: %s", upload_response["error"])
                     return redirect('upload_document')
@@ -147,13 +151,13 @@ def upload_document_view(request):
                 document.file_path = bucket_path
                 document.file_url = signed_url
 
-                # تحقق يدوي من الحقول (للتصحيح)
+                # تحقق يدوي من العنوان (إجراء احتياطي)
                 if not document.title:
                     messages.error(request, "العنوان مفقود.")
                     return redirect('upload_document')
 
                 document.save()
-                print("✅ تم حفظ المستند:", document)  # debug
+                logger.info("تم حفظ المستند: %s", document)
                 messages.success(request, "تم رفع المستند بنجاح.")
                 return redirect('document_list')
 
@@ -162,13 +166,12 @@ def upload_document_view(request):
                 messages.error(request, "حدث خطأ أثناء رفع المستند. يرجى المحاولة لاحقًا.")
 
         else:
-            print("❌ أخطاء النموذج:", form.errors)  # debug
+            logger.warning("❌ أخطاء النموذج: %s", form.errors)
             messages.warning(request, "الرجاء التأكد من تعبئة جميع الحقول بشكل صحيح.")
     else:
         form = DocumentUploadForm()
 
     return render(request, 'content/upload_document.html', {'form': form})
-
 # API ViewSet
 class DocumentViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = DocumentSerializer

@@ -12,7 +12,7 @@
         </svg>
         <span class="label">لوحة الموظف</span>
       </a>
-    {% else %}
+    {% elif role == "admin" %}
       <a href="{% url 'admin_dashboard' %}">
         <svg class="nav-icon" viewBox="0 0 24 24">
           <path d="M3 13h8V3H3v10zm10 8h8v-6h-8v6zM3 21h8v-6H3v6zm10-8h8V3h-8v10z"/>
@@ -27,6 +27,13 @@
           <path d="M12 5v14m-7-7h14"/>
         </svg>
         <span class="label">إضافة موظف</span>
+      </a>
+
+      <a href="{% url 'staff_list' %}">
+        <svg class="nav-icon" viewBox="0 0 24 24">
+          <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/>
+        </svg>
+        <span class="label">قائمة الموظفين</span>
       </a>
 
       <a href="{% url 'add_task' %}">

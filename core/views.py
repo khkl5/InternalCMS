@@ -4,8 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse
 from django.db.models import Count
-from django.contrib import messages
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.models import User
+from core.models import UserProfile
+from core.forms import StaffEditForm
 from core.models import UserProfile
 from core.decorators import role_required
 from clients.models import Client
@@ -16,7 +19,6 @@ from clients.models import Client
 from tasks.models import Task
 from content.models import Document
 from django.shortcuts import render, redirect
-from django.contrib import messages
 from django.contrib.auth.models import User
 
 
@@ -186,3 +188,50 @@ def add_staff_view(request):
         form = AddStaffForm()
 
     return render(request, 'core/add_staff.html', {'form': form})
+@login_required
+@role_required(['admin'])
+def staff_list_view(request):
+    staff_list = User.objects.exclude(is_superuser=True)
+    return render(request, 'core/staff_list.html', {'staff_list': staff_list})
+@login_required
+@role_required(['admin'])
+def delete_staff_view(request, staff_id):
+    user = get_object_or_404(User, id=staff_id)
+    if user.is_superuser:
+        messages.error(request, "لا يمكن حذف المدير الخارق.")
+    else:
+        user.delete()
+        messages.success(request, "تم حذف الموظف بنجاح.")
+    return redirect('staff_list')
+from .forms import StaffEditForm
+
+@login_required
+@role_required(['admin'])
+def edit_staff_view(request, staff_id):
+    user = get_object_or_404(User, id=staff_id)
+    if request.method == "POST":
+        form = StaffEditForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "تم تحديث بيانات الموظف بنجاح.")
+            return redirect('staff_list')
+    else:
+        form = StaffEditForm(instance=user)
+    return render(request, 'core/edit_staff.html', {'form': form, 'user_obj': user})
+# core/views.py
+
+
+def edit_staff_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    profile = get_object_or_404(UserProfile, user=user)
+    if request.method == "POST":
+        form = StaffEditForm(request.POST, user_instance=user, profile_instance=profile)
+        if form.is_valid():
+            form.save(user, profile)
+            messages.success(request, "تم تعديل بيانات الموظف بنجاح")
+            return redirect('staff_list')
+        else:
+            messages.error(request, "حدث خطأ أثناء تعديل بيانات الموظف.")
+    else:
+        form = StaffEditForm(user_instance=user, profile_instance=profile)
+    return render(request, 'core/edit_staff.html', {'form': form, 'user_obj': user})

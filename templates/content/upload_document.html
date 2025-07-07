@@ -1,52 +1,179 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
+{% load static %}
 
 {% block title %}رفع مستند جديد{% endblock %}
 
 {% block content %}
-<div dir="rtl" class="my-5" style="margin-right: 40px; max-width: 600px;">
-    <div class="card shadow border-0 rounded-4 p-4 bg-white text-end">
-        <h2 class="mb-4 text-primary fw-bold" style="font-size: 1.8rem;">
-            رفع مستند جديد
-        </h2>
-
-        <form method="post" enctype="multipart/form-data" novalidate>
-            {% csrf_token %}
-
-            <div class="mb-4">
-                <label for="id_title" class="form-label fw-semibold">عنوان المستند</label>
-                {{ form.title|add_class:"form-control form-control-lg border-2 shadow-sm text-end" }}
-            </div>
-
-            <div class="mb-4">
-                <label for="id_client" class="form-label fw-semibold">العميل المرتبط</label>
-                {{ form.client|add_class:"form-select form-select-lg border-2 shadow-sm text-end" }}
-            </div>
-
-            <div class="mb-4">
-                <label for="id_access_level" class="form-label fw-semibold">مستوى الوصول</label>
-                {{ form.access_level|add_class:"form-select form-select-lg border-2 shadow-sm text-end" }}
-            </div>
-
-            <div class="mb-4">
-                <label for="id_file" class="form-label fw-semibold">اختر الملف</label>
-                {{ form.file|add_class:"form-control form-control-lg border-2 shadow-sm text-end" }}
-                <small id="file-name" class="form-text text-muted mt-2 d-block">لم يتم اختيار أي ملف.</small>
-            </div>
-
-            <div class="d-grid mt-4">
-                <button type="submit" class="btn btn-primary btn-lg rounded-pill">
-                    📎 رفع المستند
-                </button>
-            </div>
-        </form>
+<div class="upload-docs-container">
+  <div class="upload-docs-card">
+    <div class="upload-docs-header">
+      
+      <h2>رفع مستند جديد</h2>
     </div>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="id_title">عنوان المستند</label>
+        {{ form.title|add_class:"form-control-input" }}
+      </div>
+      <div class="form-group">
+        <label for="id_client">العميل المرتبط</label>
+        {{ form.client|add_class:"form-select-input" }}
+      </div>
+      <div class="form-group">
+        <label for="id_access_level">مستوى الوصول</label>
+        {{ form.access_level|add_class:"form-select-input" }}
+      </div>
+      <div class="form-group">
+        <label for="id_file">اختر الملف</label>
+        {{ form.file|add_class:"form-control-input" }}
+        <small id="file-name" class="file-info">لم يتم اختيار أي ملف.</small>
+      </div>
+
+      <button type="submit" class="submit-btn">
+        <span class="btn-icon">📎</span> رفع المستند
+      </button>
+    </form>
+  </div>
 </div>
 
 <script>
-    document.getElementById('id_file').addEventListener('change', function () {
-        const fileName = this.files[0]?.name || "لم يتم اختيار أي ملف.";
-        document.getElementById('file-name').textContent = "الملف المحدد: " + fileName;
-    });
+document.getElementById('id_file').addEventListener('change', function () {
+  const fileName = this.files[0]?.name || "لم يتم اختيار أي ملف.";
+  document.getElementById('file-name').textContent = "الملف المحدد: " + fileName;
+});
 </script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+body {
+  background: linear-gradient(120deg,#e8f6ff 0%,#e7fff4 100%);
+  font-family: 'Tajawal', sans-serif;
+}
+.upload-docs-container {
+  min-height: 85vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 40px;
+}
+.upload-docs-card {
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 8px 40px rgba(44,195,243,0.06), 0 2px 6px rgba(93,230,169,0.06);
+  max-width: 440px;
+  width: 100%;
+  padding: 34px 26px 28px 26px;
+  position: relative;
+  transition: box-shadow 0.3s;
+  border: 1.5px solid #e6f4fb;
+}
+.upload-docs-card:hover {
+  box-shadow: 0 12px 44px rgba(44,195,243,0.09), 0 2px 6px rgba(93,230,169,0.09);
+}
+.upload-docs-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 26px;
+}
+.icon-bg {
+  background: linear-gradient(135deg,#2EC6F3 60%,#5DE6A9 100%);
+  border-radius: 50%;
+  width: 60px; height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 12px #3ee7af21;
+}
+.add-icon {
+  width: 32px;
+  height: 32px;
+}
+.upload-docs-header h2 {
+  font-size: 1.28rem;
+  color: #2189B7;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+.form-group {
+  margin-bottom: 19px;
+}
+.form-group label {
+  font-weight: 700;
+  margin-bottom: 5px;
+  color: #238eb1;
+  display: block;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+.form-control-input,
+.form-select-input {
+  width: 100%;
+  padding: 12px 11px;
+  border: 1.4px solid #e4ecf0;
+  border-radius: 9px;
+  background: #f9fcfd;
+  font-size: 1rem;
+  color: #2F4157;
+  transition: border-color 0.18s;
+  outline: none;
+  margin-top: 2px;
+}
+.form-control-input:focus,
+.form-select-input:focus {
+  border-color: #2ec6f3;
+  background: #e7faff;
+}
+.submit-btn {
+  width: 100%;
+  background: linear-gradient(120deg,#2ec6f3 65%,#5de6a9 100%);
+  color: #fff;
+  border: none;
+  padding: 13px;
+  font-size: 1.08rem;
+  font-weight: bold;
+  border-radius: 9px;
+  box-shadow: 0 3px 12px #2ec6f315;
+  cursor: pointer;
+  transition: opacity 0.25s, box-shadow 0.2s;
+  margin-top: 8px;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.submit-btn:hover {
+  opacity: 0.92;
+  box-shadow: 0 7px 22px #2ec6f326;
+}
+.btn-icon {
+  font-size: 1.22em;
+  display: flex;
+  align-items: center;
+}
+.file-info {
+  display: block;
+  margin-top: 6px;
+  color: #249891;
+  background: #e7faff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.93em;
+  font-weight: 500;
+  animation: fadeIn 0.5s;
+  border: 1px solid #c8f1ed;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(14px);}
+  to { opacity: 1; transform: none;}
+}
+</style>
 {% endblock %}

@@ -8,9 +8,11 @@
     
     <div class="header-row">
       <h2>📄 قائمة المستندات</h2>
-      {% if role == 'staff' %}
+      {% if role == 'admin' or role == 'staff' %}
+
         <a href="{% url 'upload_document' %}" class="add-doc-btn">+ رفع مستند جديد</a>
       {% endif %}
+
     </div>
 
 <!-- البحث -->

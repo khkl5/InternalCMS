@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}قائمة الموظفين{% endblock %}
+
+{% block content %}
+<div class="clients-container">
+  <div class="clients-card">
+    <div class="header-row">
+      <h2>👥 قائمة الموظفين</h2>
+      {% if role == 'admin' %}
+        <a href="{% url 'add_staff' %}" class="add-client-btn">+ إضافة موظف جديد</a>
+      {% endif %}
+    </div>
+
+    <table class="clients-table">
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>البريد</th>
+          <th>الدور</th>
+          <th>تاريخ الإضافة</th>
+          <th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for staff in staff_list %}
+        <tr>
+          <td>{{ staff.get_full_name }}</td>
+          <td>{{ staff.email }}</td>
+          <td>{{ staff.userprofile.role.name }}</td>
+          <td>{{ staff.date_joined|date:"Y-m-d" }}</td>
+          <td>
+            {% if role == 'admin' %}
+              <a href="{% url 'edit_staff' staff.id %}" class="task-btn">✏️ تعديل</a>
+              <a href="{% url 'delete_staff' staff.id %}" class="task-btn" style="background-color:#f85d7a;"
+                 onclick="return confirm('هل أنت متأكد من حذف هذا الموظف؟');">🗑 حذف</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="empty-row">لا توجد بيانات موظفين</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+body {
+  background-color: #F0F4F8;
+  font-family: 'Tajawal', sans-serif;
+}
+
+.clients-container {
+  display: flex;
+  justify-content: center;
+  padding-top: 80px;
+  padding-bottom: 40px;
+}
+
+.clients-card {
+  background: #ffffff;
+  padding: 30px 25px;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 1000px;
+  color: #2F4157;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.add-client-btn {
+  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background 0.3s;
+}
+
+.add-client-btn:hover {
+  opacity: 0.9;
+}
+
+.clients-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.clients-table th,
+.clients-table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.clients-table thead {
+  background-color: #EAF7FA;
+}
+
+.clients-table tbody tr:hover {
+  background-color: #f5f9fc;
+}
+
+.task-btn {
+  background-color: #2EC6F3;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  margin: 0 3px;
+  transition: background 0.2s;
+}
+
+.task-btn:hover {
+  background-color: #199ec2;
+}
+
+.task-btn[style*="background-color:#f85d7a;"]:hover {
+  background-color: #d6425a !important;
+}
+
+.empty-row {
+  text-align: center;
+  color: #777;
+  font-size: 0.95rem;
+}
+</style>
+{% endblock %}

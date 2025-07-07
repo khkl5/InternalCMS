@@ -11,6 +11,7 @@ urlpatterns = [
     path('add/client/<int:client_id>/', views.add_task_for_client, name='add_task_for_client'),
     path('tasks/<int:task_id>/', task_detail_view, name='task_detail'),
     path('staff-dashboard/', views.staff_dashboard_view, name='staff_dashboard'),
+    
 
     
 

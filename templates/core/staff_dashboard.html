@@ -8,25 +8,29 @@
 
   <div class="cards-grid">
 
-    <div class="report-card gradient-green">
+    <!-- ✅ كرت المهام إجمالي -->
+    <a href="{% url 'task_list' %}" class="report-card gradient-green card-link">
       <h5>إجمالي المهام</h5>
       <p>{{ total_tasks }}</p>
-    </div>
+    </a>
 
-    <div class="report-card gradient-purple">
+    <!-- ✅ كرت المهام المكتملة -->
+    <a href="{% url 'task_list' %}" class="report-card gradient-purple card-link">
       <h5>المهام المكتملة</h5>
       <p>{{ tasks_completed }}</p>
-    </div>
+    </a>
 
-    <div class="report-card gradient-blue">
+    <!-- ✅ كرت عدد المستندات -->
+    <a href="{% url 'document_list' %}" class="report-card gradient-blue card-link">
       <h5>عدد المستندات</h5>
       <p>{{ total_documents }}</p>
-    </div>
+    </a>
 
-    <div class="report-card gradient-pink">
+    <!-- ✅ كرت عدد العملاء -->
+    <a href="{% url 'client_list' %}" class="report-card gradient-pink card-link">
       <h5>عدد العملاء</h5>
       <p>{{ total_clients }}</p>
-    </div>
+    </a>
 
     <div class="report-card white-card task-preview-card span-2">
       <h5>📌 أحدث المهام المسندة إليك</h5>
@@ -177,6 +181,14 @@ body {
 .status-pending   { background: #FFF3CD; color: #856404; }
 .status-completed { background: #D4EDDA; color: #155724; }
 .status-overdue   { background: #F8D7DA; color: #721C24; }
+
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
 .span-2 {
   grid-column: span 2;

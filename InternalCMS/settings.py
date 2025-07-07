@@ -49,10 +49,12 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.user_role',  # أضف هذا السطر هنا
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'InternalCMS.wsgi.application'
 
