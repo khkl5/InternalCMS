@@ -146,6 +146,8 @@ def upload_document_view(request):
                     return redirect('upload_document')
 
                 document.save()
+                form.save_m2m()
+
                 logger.info("تم حفظ المستند: %s", document)
                 messages.success(request, "تم رفع المستند بنجاح.")
                 return redirect('document_list')
