@@ -19,14 +19,20 @@
         <label for="id_title">عنوان المستند</label>
         {{ form.title|add_class:"form-control-input" }}
       </div>
-      <div class="form-group">
+      <div class="form-group" id="client-group">
         <label for="id_client">العميل المرتبط</label>
         {{ form.client|add_class:"form-select-input" }}
       </div>
+      <div id="allowed-users-group" class="form-group">
+
+        <label>الموظفون المسموح لهم (للمستند المقيّد فقط)</label>
+        {{ form.allowed_users }}
+      </div>
+
       <div class="form-group">
         <label for="id_access_level">مستوى الوصول</label>
         {{ form.access_level|add_class:"form-select-input" }}
-      </div>
+      </div>     
       <div class="form-group">
         <label for="id_file">اختر الملف</label>
         {{ form.file|add_class:"form-control-input" }}
@@ -175,5 +181,204 @@ body {
   from { opacity: 0; transform: translateY(14px);}
   to { opacity: 1; transform: none;}
 }
+.select2-container--default .select2-selection--multiple,
+.select2-container--default .select2-selection--single {
+  background: #f9fcfd;
+  border: 1.4px solid #e4ecf0;
+  border-radius: 9px;
+  padding: 5px 6px;
+  min-height: 44px;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 1rem;
+  color: #2F4157;
+}
+.select2-selection__choice {
+  background: #e7faff;
+  color: #238eb1;
+  border: 1px solid #2ec6f3;
+  border-radius: 6px;
+  margin: 3px 0 3px 5px;
+  font-family: 'Tajawal', sans-serif;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+  padding: 3px 6px;
+}
+.select2-container .select2-search--inline .select2-search__field {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 1rem;
+}
+#allowed-users-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  height: 150px; /* مربع ثابت دائماً */
+  overflow-y: scroll; /* الشريط يظهر دائمًا حتى مع 1 أو 2 موظف */
+  border: 2px solid #2ec6f3;
+  background: #e7faff;
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* تحسين مظهر Scrollbar للمتصفحات الحديثة */
+#allowed-users-group ul {
+  scrollbar-width: thin; /* للفايرفوكس */
+  scrollbar-color: #2ec6f3 #e7faff;
+}
+#allowed-users-group ul::-webkit-scrollbar {
+  width: 6px;
+  background: #e7faff;
+}
+#allowed-users-group ul::-webkit-scrollbar-thumb {
+  background: #2ec6f3;
+  border-radius: 7px;
+}
+
+#allowed-users-group li {
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  padding: 4px 10px 2px 4px;
+}
+
+#allowed-users-group label {
+  margin-right: 8px;
+  font-weight: 500;
+  color: #1c6c80;
+  cursor: pointer;
+  font-family: 'Tajawal', sans-serif;
+}
+
+#allowed-users-group input[type="checkbox"] {
+  accent-color: #2ec6f3;
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+}
+#allowed-users-group ul {
+  height: 150px;
+  overflow-y: scroll;
+}
+.custom-checkbox-scroll {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  height: 150px;
+  overflow-y: scroll;
+  border: 2px solid #2ec6f3;
+  background: #e7faff;
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* تحسين Scroll */
+.custom-checkbox-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #2ec6f3 #e7faff;
+}
+.custom-checkbox-scroll::-webkit-scrollbar {
+  width: 6px;
+  background: #e7faff;
+}
+.custom-checkbox-scroll::-webkit-scrollbar-thumb {
+  background: #2ec6f3;
+  border-radius: 7px;
+}
+.checkbox-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  height: 150px;
+  overflow-y: auto;
+  border: 1px solid #2ec6f3;
+  background: #e7faff;
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.checkbox-list li {
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-list label {
+  margin-right: 8px;
+  font-weight: 500;
+  color: #1c6c80;
+  cursor: pointer;
+}
+
+.checkbox-list input[type="checkbox"] {
+  accent-color: #2ec6f3;
+  width: 18px;
+  height: 18px;
+  margin-left: 8px;
+}
+
+/* Scroll لطيف */
+.checkbox-list {
+  scrollbar-width: thin;
+  scrollbar-color: #2ec6f3 #e7faff;
+}
+.checkbox-list::-webkit-scrollbar {
+  width: 6px;
+  background: #e7faff;
+}
+.checkbox-list::-webkit-scrollbar-thumb {
+  background: #2ec6f3;
+  border-radius: 6px;
+}
+
 </style>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+function toggleDynamicFields() {
+  const accessLevel = document.getElementById('id_access_level').value;
+  const clientGroup = document.getElementById('client-group');
+  const allowedUsersGroup = document.getElementById('allowed-users-group');
+  const clientInput = document.getElementById('id_client');
+  const allowedUsersInput = document.getElementById('id_allowed_users');
+
+  if (accessLevel === 'client_shared') {
+    clientGroup.style.display = 'block';
+    clientInput.required = true;
+  } else {
+    clientGroup.style.display = 'none';
+    clientInput.required = false;
+    clientInput.value = '';
+    if (window.jQuery) $('#id_client').val(null).trigger('change');
+  }
+
+  if (accessLevel === 'restricted') {
+    allowedUsersGroup.style.display = 'block';
+    allowedUsersInput.required = true;
+    if (window.jQuery) $('#id_allowed_users').prop('required', true);
+  } else {
+    allowedUsersGroup.style.display = 'none';
+    allowedUsersInput.required = false;
+    if (window.jQuery) {
+      $('#id_allowed_users').val(null).trigger('change');
+      $('#id_allowed_users').prop('required', false);
+    }
+  }
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  // تفعيل Select2 فقط على حقل العميل (client)
+  if (window.jQuery) {
+    $('#id_client').select2({
+      placeholder: 'اختر العميل المرتبط...',
+      width: '100%',
+      dir: "rtl",
+      dropdownParent: $('#client-group')
+    });
+  }
+
+  toggleDynamicFields();
+  document.getElementById('id_access_level').addEventListener('change', toggleDynamicFields);
+});
+</script>
 {% endblock %}

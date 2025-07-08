@@ -21,31 +21,37 @@ logger = logging.getLogger(__name__)
 
 # عرض قائمة المستندات
 
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from .models import Document
+from supabase import create_client
+import logging
+
+logger = logging.getLogger(__name__)
+
+supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+
+# عرض قائمة المستندات مع دعم الصلاحيات
 @login_required
 def document_list_view(request):
     user = request.user
     role = getattr(user.userprofile.role, 'name', None)
 
-    # جلب المستندات حسب الدور
-    if role == 'admin':
-        documents = Document.objects.all()
-    elif role == 'staff':
-        documents = Document.objects.filter(uploaded_by=user)
-    else:
-        documents = Document.objects.filter(access_level__in=['public', 'restricted'])
+    # جلب كل المستندات التي يحق للمستخدم رؤيتها (باستخدام دالة can_view)
+    all_documents = Document.objects.all()
+    documents = [doc for doc in all_documents if doc.can_view(user)]
 
     # دعم البحث
     query = request.GET.get('q', '')
     if query:
-        documents = documents.filter(title__icontains=query)
+        documents = [doc for doc in documents if query.lower() in doc.title.lower()]
 
-    # تجهيز خصائص العرض/التحميل
+    # تجهيز خصائص العرض/التحميل (كما كان في الكود الأصلي)
     for doc in documents:
-        doc.can_download = (
-            role == 'admin' or
-            (role == 'staff' and doc.uploaded_by == user) or
-            (role == 'viewer' and doc.access_level in ['public', 'restricted'])
-        )
+        doc.can_download = doc.can_view(user)
+        doc.can_delete = doc.can_delete(user)
         if doc.file_url:
             extension = doc.file_url.lower().split('.')[-1]
             doc.is_image = extension in ['jpg', 'jpeg', 'png', 'gif']
@@ -54,23 +60,22 @@ def document_list_view(request):
             doc.is_image = False
             doc.is_pdf = False
 
-    # إرسال جميع المتغيرات الضرورية
     return render(request, 'content/document_list.html', {
         'documents': documents,
         'role': role,
-        'is_admin': role == 'admin',   # <-- أضف هذا فقط
+        'is_admin': role == 'admin',
         'query': query,
     })
 
-# حذف مستند (للمشرف فقط)
+# حذف مستند (مراعاة صلاحية الحذف)
 @login_required
 def delete_document_view(request, document_id):
-    role = getattr(request.user.userprofile.role, 'name', None)
-
-    if role != 'admin':
-        return render(request, '403.html', status=403)
-
     document = get_object_or_404(Document, id=document_id)
+    user = request.user
+
+    # التحقق من صلاحية الحذف
+    if not document.can_delete(user):
+        return render(request, '403.html', status=403)
 
     try:
         # حذف الملف من supabase إذا وجد
@@ -78,10 +83,6 @@ def delete_document_view(request, document_id):
             delete_response = supabase.storage.from_(settings.SUPABASE_STORAGE_BUCKET).remove([document.file_path])
             if hasattr(delete_response, "error") and delete_response.error:
                 logger.error("فشل حذف الملف من Supabase: %s", delete_response.error)
-            else:
-                logger.info("تم حذف الملف من Supabase: %s", document.file_path)
-
-        # حذف المستند من قاعدة البيانات
         document.delete()
         messages.success(request, 'تم حذف المستند بنجاح.')
 
@@ -90,18 +91,6 @@ def delete_document_view(request, document_id):
         messages.error(request, 'حدث خطأ أثناء الحذف.')
 
     return redirect('document_list')
-
-# دالة رفع مستند (للواجهة - للموظف فقط)
-supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
-
-def slugify_filename(filename):
-    name, ext = filename.rsplit('.', 1)
-    name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore').decode('ascii')
-    name = re.sub(r'[^a-zA-Z0-9_-]+', '-', name).strip('-')
-    unique_suffix = uuid.uuid4().hex[:8]
-    return f"{name}-{unique_suffix}.{ext}"
-
-logger = logging.getLogger(__name__)  # لتسجيل الأخطاء
 
 @login_required
 def upload_document_view(request):
