@@ -9,6 +9,7 @@ urlpatterns = [
     path('content/', include('content.urls')),
     path('tasks/', include('tasks.urls')),
     path('clients/', include('clients.urls')),
+    path('mailer/', include('mailer.urls'))
 ]
 
 if settings.DEBUG:

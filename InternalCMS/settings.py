@@ -2,6 +2,9 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 from django.contrib.messages import constants as messages
+import environ
+env = environ.Env()
+environ.Env.read_env()
 
 # تحميل .env
 load_dotenv()
@@ -24,6 +27,7 @@ INSTALLED_APPS = [
     'content',
     'tasks',
     'clients',
+    'mailer',
 ]
 
 MIDDLEWARE = [
@@ -122,3 +126,11 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.ERROR: 'danger',
 }
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'apikey'  # هذا النص حرفيًا (apikey)
+EMAIL_HOST_PASSWORD = 'REMOVED'  # استبدليها بمفتاحك من SendGrid
+EMAIL_USE_TLS = True
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+DEFAULT_FROM_EMAIL = 'internalcms26@gmail.com'  # لازم يكون ايميل موثّق في SendGrid

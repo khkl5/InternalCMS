@@ -235,3 +235,17 @@ def edit_staff_view(request, user_id):
     else:
         form = StaffEditForm(user_instance=user, profile_instance=profile)
     return render(request, 'core/edit_staff.html', {'form': form, 'user_obj': user})
+from django.core.mail import send_mail
+from django.http import HttpResponse
+from django.conf import settings
+
+def send_test_email(request):
+    send_mail(
+        subject='تجربة إرسال إيميل من Django',
+        message='تم إرسال هذا البريد بنجاح عبر SendGrid! 🚀',
+        recipient_list=['khklooookh@gmail.com'],  # الإيميل الذي تريدين استقباله
+        from_email=settings.DEFAULT_FROM_EMAIL,    # تأكدي أنه مطابق للإيميل الموثق
+        fail_silently=False,
+    )
+    return HttpResponse("تم إرسال الإيميل! تحقق من بريدك 🚀")
+
