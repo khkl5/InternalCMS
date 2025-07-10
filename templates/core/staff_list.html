@@ -7,13 +7,10 @@
   <div class="clients-card">
     <div class="header-row">
       <h2>👥 قائمة المستخدمين</h2>
-
       {% if role == 'admin' %}
         <a href="{% url 'add_user' %}" class="add-client-btn">+ إضافة مستخدم جديد</a>
-
       {% endif %}
     </div>
-
     <table class="clients-table">
       <thead>
         <tr>
@@ -34,8 +31,9 @@
           <td>
             {% if role == 'admin' %}
               <a href="{% url 'edit_staff' staff.id %}" class="task-btn">✏️ تعديل</a>
-              <a href="{% url 'delete_staff' staff.id %}" class="task-btn" style="background-color:#f85d7a;"
-                 onclick="return confirm('هل أنت متأكد من حذف هذا الموظف؟');">🗑 حذف</a>
+              <a href="{% url 'delete_staff' staff.id %}" class="task-btn delete-btn"
+                 style="background-color:#f85d7a;"
+                 data-url="{% url 'delete_staff' staff.id %}">🗑 حذف</a>
             {% endif %}
           </td>
         </tr>
@@ -56,14 +54,12 @@ body {
   background-color: #F0F4F8;
   font-family: 'Tajawal', sans-serif;
 }
-
 .clients-container {
   display: flex;
   justify-content: center;
   padding-top: 80px;
   padding-bottom: 40px;
 }
-
 .clients-card {
   background: #ffffff;
   padding: 30px 25px;
@@ -73,14 +69,12 @@ body {
   max-width: 1000px;
   color: #2F4157;
 }
-
 .header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
-
 .add-client-btn {
   background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
   color: white;
@@ -90,31 +84,25 @@ body {
   font-size: 0.95rem;
   transition: background 0.3s;
 }
-
 .add-client-btn:hover {
   opacity: 0.9;
 }
-
 .clients-table {
   width: 100%;
   border-collapse: collapse;
 }
-
 .clients-table th,
 .clients-table td {
   padding: 12px;
   text-align: center;
   border-bottom: 1px solid #e0e6ed;
 }
-
 .clients-table thead {
   background-color: #EAF7FA;
 }
-
 .clients-table tbody tr:hover {
   background-color: #f5f9fc;
 }
-
 .task-btn {
   background-color: #2EC6F3;
   color: white;
@@ -125,19 +113,46 @@ body {
   margin: 0 3px;
   transition: background 0.2s;
 }
-
 .task-btn:hover {
   background-color: #199ec2;
 }
-
 .task-btn[style*="background-color:#f85d7a;"]:hover {
   background-color: #d6425a !important;
 }
-
 .empty-row {
   text-align: center;
   color: #777;
   font-size: 0.95rem;
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.delete-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const url = btn.getAttribute('data-url');
+      Swal.fire({
+        icon: 'warning',
+        title: 'تأكيد الحذف',
+        text: 'هل أنت متأكد من حذف هذا الموظف؟',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، احذف',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#f85d7a',
+        cancelButtonColor: '#3085d6',
+        customClass: {
+          popup: 'swal2-rounded'
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = url;
+        }
+      });
+    });
+  });
+});
+</script>
 {% endblock %}

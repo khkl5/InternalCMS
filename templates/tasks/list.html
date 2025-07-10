@@ -5,8 +5,12 @@
 {% block content %}
 <div class="tasks-container">
   <div class="tasks-card">
-    <h2>📋 قائمة جميع المهام</h2>
-
+    <div class="header-row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;">
+      <h2 style="margin:0;">📋 قائمة جميع المهام</h2>
+      {% if request.user.userprofile.role.name == 'admin' %}
+      <a href="{% url 'add_task' %}" class="add-task-btn">➕ إضافة مهمة جديدة</a>
+      {% endif %}
+    </div>
     <div class="table-responsive">
       <table class="tasks-table">
         <thead>
@@ -146,14 +150,12 @@ body {
   background-color: #F0F4F8;
   font-family: 'Tajawal', sans-serif;
 }
-
 .tasks-container {
   display: flex;
   justify-content: center;
   padding-top: 80px;
   padding-bottom: 40px;
 }
-
 .tasks-card {
   background: #ffffff;
   padding: 30px 25px;
@@ -163,33 +165,41 @@ body {
   max-width: 1100px;
   color: #2F4157;
 }
-
 .tasks-card h2 {
   text-align: center;
   margin-bottom: 25px;
   font-size: 1.4rem;
 }
-
+.add-task-btn {
+  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px #2ec6f32a;
+  transition: opacity 0.2s, background 0.3s;
+}
+.add-task-btn:hover {
+  opacity: 0.9;
+}
 .tasks-table {
   width: 100%;
   border-collapse: collapse;
 }
-
 .tasks-table th,
 .tasks-table td {
   padding: 12px;
   text-align: center;
   border-bottom: 1px solid #e0e6ed;
 }
-
 .tasks-table thead {
   background-color: #EAF7FA;
 }
-
 .tasks-table tbody tr:hover {
   background-color: #f5f9fc;
 }
-
 .badge {
   padding: 5px 10px;
   border-radius: 8px;
@@ -197,28 +207,23 @@ body {
   font-weight: 600;
   display: inline-block;
 }
-
 .badge-warning {
   background-color: #ffeaa7;
   color: #555;
 }
-
 .badge-success {
   background-color: #55efc4;
   color: #2d3436;
 }
-
 .badge-danger {
   background-color: #ff7675;
   color: #fff;
 }
-
 .empty-row {
   text-align: center;
   color: #777;
   font-size: 0.95rem;
 }
-
 .form-select {
   padding: 6px 10px;
   font-size: 0.85rem;
