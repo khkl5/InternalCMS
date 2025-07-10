@@ -20,7 +20,8 @@ from tasks.models import Task
 from content.models import Document
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-
+from django.db import IntegrityError
+from core.forms import AddUserForm
 
 @login_required
 def dashboard_view(request):
@@ -249,3 +250,27 @@ def send_test_email(request):
     )
     return HttpResponse("تم إرسال الإيميل! تحقق من بريدك 🚀")
 
+
+
+
+@role_required(['admin'])
+@login_required
+def add_user_view(request):
+    form = AddUserForm(request.POST or None)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            try:
+                profile = form.save()
+                full_name = profile.user.get_full_name()
+                messages.success(request, f"تمت إضافة المستخدم {full_name} بنجاح.")
+                return redirect('add_user')
+            except IntegrityError:
+                messages.error(request, "فشل في إنشاء المستخدم بسبب تكرار اسم المستخدم أو البريد الإلكتروني.")
+        else:
+            # في حال وجود أخطاء في التحقق المسبق من الفورم
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{form.fields[field].label}: {error}")
+
+    return render(request, 'core/add_user.html', {'form': form})

@@ -103,3 +103,49 @@ class StaffEditForm(forms.Form):
         profile_instance.department = self.cleaned_data['department']
         profile_instance.role = self.cleaned_data['role']
         profile_instance.save()
+class AddUserForm(forms.Form):
+    full_name = forms.CharField(label="الاسم الكامل", max_length=150)
+    username = forms.CharField(label="اسم المستخدم", max_length=150)
+    email = forms.EmailField(label="البريد الإلكتروني")
+    password = forms.CharField(label="كلمة المرور", widget=forms.PasswordInput)
+    phone_number = forms.CharField(label="رقم الجوال", max_length=20, required=False)
+    department = forms.CharField(label="القسم", max_length=100, required=False)
+    role = forms.ModelChoiceField(
+        queryset=Role.objects.all(),
+        label="الدور",
+        widget=forms.Select(),
+        required=True
+    )
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if User.objects.filter(username=username).exists():
+            raise ValidationError("اسم المستخدم موجود بالفعل.")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("البريد الإلكتروني مستخدم بالفعل.")
+        return email
+
+    def save(self):
+        full_name = self.cleaned_data['full_name']
+        first_name = full_name.split()[0]
+        last_name = ' '.join(full_name.split()[1:]) if len(full_name.split()) > 1 else ''
+
+        user = User.objects.create_user(
+            username=self.cleaned_data['username'],
+            password=self.cleaned_data['password'],
+            email=self.cleaned_data['email'],
+            first_name=first_name,
+            last_name=last_name,
+        )
+
+        profile = UserProfile.objects.create(
+            user=user,
+            phone_number=self.cleaned_data['phone_number'],
+            department=self.cleaned_data['department'],
+            role=self.cleaned_data['role'],
+        )
+        return profile

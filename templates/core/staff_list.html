@@ -6,9 +6,11 @@
 <div class="clients-container">
   <div class="clients-card">
     <div class="header-row">
-      <h2>👥 قائمة الموظفين</h2>
+      <h2>👥 قائمة المستخدمين</h2>
+
       {% if role == 'admin' %}
-        <a href="{% url 'add_staff' %}" class="add-client-btn">+ إضافة موظف جديد</a>
+        <a href="{% url 'add_user' %}" class="add-client-btn">+ إضافة مستخدم جديد</a>
+
       {% endif %}
     </div>
 

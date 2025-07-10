@@ -4,8 +4,8 @@
 {% block content %}
 <div class="add-staff-container">
   <div class="add-staff-card">
-    <h2>➕ إضافة موظف جديد</h2>
-    <form method="post" action="{% url 'add_staff' %}">
+    <h2>➕ إضافة مستخدم جديد</h2>
+    <form method="post" action="{% url 'add_user' %}">
       {% csrf_token %}
 
       <div class="form-group">
@@ -38,16 +38,13 @@
         {{ form.department }}
       </div>
 
-      <button type="submit" class="submit-btn">إضافة الموظف</button>
-    </form>
+      <div class="form-group">
+        <label for="id_role">الدور</label>
+        {{ form.role }}
+      </div>
 
-    {% if messages %}
-      <ul class="messages">
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
+      <button type="submit" class="submit-btn">إضافة المستخدم</button>
+    </form>
   </div>
 </div>
 {% endblock %}
@@ -120,21 +117,6 @@ body {
 
 .submit-btn:hover {
   opacity: 0.9;
-}
-
-.messages {
-  margin-top: 20px;
-  list-style: none;
-  padding: 0;
-  text-align: center;
-}
-
-.messages li {
-  background: #d4edda;
-  color: #155724;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 5px;
 }
 </style>
 {% endblock %}

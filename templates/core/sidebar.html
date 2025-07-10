@@ -22,11 +22,13 @@
     {% endif %}
 
     {% if role == "admin" %}
-      <a href="{% url 'add_staff' %}">
+      <a href="{% url 'add_user' %}">
+
         <svg class="nav-icon" viewBox="0 0 24 24">
           <path d="M12 5v14m-7-7h14"/>
         </svg>
-        <span class="label">إضافة موظف</span>
+        <span class="label">إضافة مستخدم</span>
+
       </a>
 
       <a href="{% url 'staff_list' %}">
