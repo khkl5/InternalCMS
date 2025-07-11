@@ -28,7 +28,20 @@
         <tr>
           <td>{{ task.title }}</td>
           <td class="desc-cell">{{ task.description|truncatewords:10 }}</td>
-          <td>{{ task.assigned_to|default:"-" }}</td>
+          <td>
+            {# يدعم الاسم الكامل من UserProfile أو من المستخدم الافتراضي أو fallback لليوزرنيم #}
+            {% if task.assigned_to %}
+              {% if task.assigned_to.userprofile.full_name %}
+                {{ task.assigned_to.userprofile.full_name }}
+              {% elif task.assigned_to.get_full_name %}
+                {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
+              {% else %}
+                {{ task.assigned_to.username }}
+              {% endif %}
+            {% else %}
+              -
+            {% endif %}
+          </td>
           <td>
             {% if task.status == 'pending' %}
               <span class="badge badge-warning">قيد التنفيذ</span>

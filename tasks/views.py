@@ -127,19 +127,25 @@ def update_task_status(request, task_id):
 
 
 # ✅ حذف مهمة (مدير فقط)
-@require_POST
 @login_required
 @role_required(['admin'])
 def delete_task_view(request, task_id):
-    try:
-        task = Task.objects.get(id=task_id)
-        task.delete()
-        return JsonResponse({'success': True})
-    except Task.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'المهمة غير موجودة'})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
+    task = get_object_or_404(Task, id=task_id)
+    client_id = task.client.id if task.client else None
 
+    if request.method == 'POST':
+        task.delete()
+        messages.success(request, "تم حذف المهمة بنجاح.")
+        if client_id:
+            return redirect('client_tasks', client_id=client_id)
+        else:
+            return redirect('task_list')
+    else:
+        messages.error(request, "لم يتم تنفيذ عملية الحذف.")
+        if client_id:
+            return redirect('client_tasks', client_id=client_id)
+        else:
+            return redirect('task_list')
 
 # ✅ لوحة تحكم المدير
 @login_required
