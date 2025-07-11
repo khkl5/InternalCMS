@@ -78,10 +78,7 @@
             <td>{{ doc.created_at|date:"Y-m-d" }}</td>
             {% if role == 'admin' %}
             <td>
-              <form method="post" action="{% url 'delete_document' document_id=doc.id %}" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">🗑</button>
-              </form>
+              <button type="button" class="btn btn-danger btn-sm delete-doc-btn" data-doc-id="{{ doc.id }}">🗑</button>
             </td>
             {% endif %}
           </tr>
@@ -192,4 +189,70 @@ body {
   font-size: 0.95rem;
 }
 </style>
+{% endblock %}  {# <-- هذه تغلق extra_css بعد نهاية </style> #}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const csrfToken = '{{ csrf_token }}';
+
+  document.querySelectorAll('.delete-doc-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const docId = btn.getAttribute('data-doc-id');
+      const row = btn.closest('tr');
+      Swal.fire({
+        title: 'تأكيد الحذف',
+        text: 'هل أنت متأكد أنك تريد حذف هذا المستند؟',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، احذف',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#ff7675',
+        cancelButtonColor: '#3085d6',
+        customClass: { popup: 'swal2-rounded' }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/content/documents/delete/${docId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'تم الحذف',
+                text: 'تم حذف المستند بنجاح',
+                confirmButtonColor: '#5DE6A9',
+                customClass: { popup: 'swal2-rounded' }
+              });
+              row.remove();
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'فشل الحذف',
+                text: data.error || "خطأ غير معروف",
+                confirmButtonColor: '#ff7675',
+                customClass: { popup: 'swal2-rounded' }
+              });
+            }
+          })
+          .catch(err => {
+            Swal.fire({
+              icon: 'error',
+              title: 'خطأ في الاتصال',
+              text: 'حدث خطأ أثناء الحذف',
+              confirmButtonColor: '#ff7675',
+              customClass: { popup: 'swal2-rounded' }
+            });
+            console.error(err);
+          });
+        }
+      });
+    });
+  });
+});
+</script>
 {% endblock %}
+
+

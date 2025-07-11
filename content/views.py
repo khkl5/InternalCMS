@@ -3,7 +3,6 @@ from .models import Document
 from .serializers import DocumentSerializer
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from supabase import create_client
 import uuid, unicodedata, re
@@ -14,6 +13,8 @@ import logging
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import Document
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
 
 
 logger = logging.getLogger(__name__)
@@ -70,12 +71,15 @@ def document_list_view(request):
 # حذف مستند (مراعاة صلاحية الحذف)
 @login_required
 def delete_document_view(request, document_id):
+    if request.method != "POST":
+        return JsonResponse({'success': False, 'error': 'طريقة الطلب غير مسموحة'}, status=405)
+
     document = get_object_or_404(Document, id=document_id)
     user = request.user
 
     # التحقق من صلاحية الحذف
     if not document.can_delete(user):
-        return render(request, '403.html', status=403)
+        return JsonResponse({'success': False, 'error': 'غير مصرح لك بحذف هذا المستند'}, status=403)
 
     try:
         # حذف الملف من supabase إذا وجد
@@ -84,13 +88,10 @@ def delete_document_view(request, document_id):
             if hasattr(delete_response, "error") and delete_response.error:
                 logger.error("فشل حذف الملف من Supabase: %s", delete_response.error)
         document.delete()
-        messages.success(request, 'تم حذف المستند بنجاح.')
-
+        return JsonResponse({'success': True})
     except Exception as e:
         logger.exception("خطأ أثناء حذف المستند: %s", e)
-        messages.error(request, 'حدث خطأ أثناء الحذف.')
-
-    return redirect('document_list')
+        return JsonResponse({'success': False, 'error': 'حدث خطأ أثناء الحذف: {}'.format(str(e))})
 
 @login_required
 def upload_document_view(request):

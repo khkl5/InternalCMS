@@ -6,7 +6,7 @@
   <div class="add-task-card">
     <h2>📝 إضافة مهمة جديدة</h2>
 
-    <form method="post" enctype="multipart/form-data">
+    <form id="add-task-form" method="post" enctype="multipart/form-data">
       {% csrf_token %}
 
       <div class="form-fields">
@@ -15,25 +15,17 @@
 
       <button type="submit" class="submit-btn">إنشاء المهمة</button>
     </form>
-
-    {% if messages %}
-      <ul class="messages">
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
   </div>
 </div>
 {% endblock %}
 
 {% block extra_css %}
 <style>
+/* ... نفس ستايلك السابق ... */
 body {
   background-color: #F0F4F8;
   font-family: 'Tajawal', sans-serif;
 }
-
 .add-task-container {
   display: flex;
   justify-content: center;
@@ -41,7 +33,6 @@ body {
   padding-top: 80px;
   padding-bottom: 40px;
 }
-
 .add-task-card {
   background: #ffffff;
   padding: 30px 25px;
@@ -51,25 +42,21 @@ body {
   width: 100%;
   color: #2F4157;
 }
-
 .add-task-card h2 {
   text-align: center;
   margin-bottom: 25px;
   font-size: 1.4rem;
   color: #2F4157;
 }
-
 .form-fields p {
   margin-bottom: 15px;
 }
-
 .form-fields label {
   display: block;
   font-weight: 600;
   margin-bottom: 6px;
   color: #2F4157;
 }
-
 .form-fields input,
 .form-fields select,
 .form-fields textarea {
@@ -80,7 +67,6 @@ body {
   font-size: 15px;
   background-color: #F9FBFC;
 }
-
 .submit-btn {
   width: 100%;
   background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
@@ -93,24 +79,63 @@ body {
   transition: opacity 0.3s ease;
   margin-top: 10px;
 }
-
 .submit-btn:hover {
   opacity: 0.9;
 }
-
-.messages {
-  margin-top: 20px;
-  list-style: none;
-  padding: 0;
-  text-align: center;
-}
-
-.messages li {
-  background: #d4edda;
-  color: #155724;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 5px;
-}
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('add-task-form');
+  const csrfToken = '{{ csrf_token }}';
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+
+    fetch(window.location.pathname, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrfToken
+      },
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'نجاح',
+          text: data.message || 'تم إنشاء المهمة بنجاح!',
+          confirmButtonColor: '#5DE6A9',
+          customClass: { popup: 'swal2-rounded' }
+        }).then(() => {
+          window.location.href = '{% url "task_list" %}';  // إلى صفحة قائمة المهام
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'خطأ',
+          text: data.error || 'حدث خطأ أثناء إنشاء المهمة!',
+          confirmButtonColor: '#ff7675',
+          customClass: { popup: 'swal2-rounded' }
+        });
+      }
+    })
+    .catch(err => {
+      Swal.fire({
+        icon: 'error',
+        title: 'خطأ في الاتصال',
+        text: 'حدث خطأ أثناء الاتصال بالخادم',
+        confirmButtonColor: '#ff7675',
+        customClass: { popup: 'swal2-rounded' }
+      });
+      console.error(err);
+    });
+  });
+});
+</script>
 {% endblock %}

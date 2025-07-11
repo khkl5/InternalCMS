@@ -85,59 +85,121 @@
   document.addEventListener('DOMContentLoaded', function () {
     const csrfToken = '{{ csrf_token }}';
 
+    // ✅ تغيير حالة المهمة
     document.querySelectorAll('.update-status').forEach(function (select) {
       select.addEventListener('change', function () {
         const taskId = this.dataset.taskId;
         const newStatus = this.value;
 
-        fetch(`/tasks/update-status/${taskId}/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-          },
-          body: JSON.stringify({ status: newStatus })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            alert("✅ تم تحديث الحالة بنجاح");
-            location.reload();
-          } else {
-            alert("❌ فشل في التحديث: " + (data.error || "خطأ غير معروف"));
+        Swal.fire({
+          title: 'تأكيد التغيير',
+          text: 'هل أنت متأكد من تغيير حالة هذه المهمة؟',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'نعم، غيّر',
+          cancelButtonText: 'إلغاء',
+          confirmButtonColor: '#5DE6A9',
+          cancelButtonColor: '#999',
+          customClass: { popup: 'swal2-rounded' }
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch(`/tasks/update-status/${taskId}/`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+              },
+              body: JSON.stringify({ status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'تم التحديث',
+                  text: 'تم تحديث الحالة بنجاح',
+                  confirmButtonColor: '#5DE6A9',
+                  customClass: { popup: 'swal2-rounded' }
+                }).then(() => location.reload());
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'فشل التحديث',
+                  text: data.error || "خطأ غير معروف",
+                  confirmButtonColor: '#ff7675',
+                  customClass: { popup: 'swal2-rounded' }
+                });
+              }
+            })
+            .catch(err => {
+              Swal.fire({
+                icon: 'error',
+                title: 'خطأ في الاتصال',
+                text: 'حدث خطأ في الاتصال بالخادم',
+                confirmButtonColor: '#ff7675',
+                customClass: { popup: 'swal2-rounded' }
+              });
+              console.error(err);
+            });
           }
-        })
-        .catch(err => {
-          alert("❌ حدث خطأ في الاتصال بالخادم");
-          console.error(err);
         });
       });
     });
 
+    // ✅ حذف المهمة
     document.querySelectorAll('.delete-task-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
         const taskId = this.dataset.taskId;
-        if (confirm("هل أنت متأكد أنك تريد حذف هذه المهمة؟")) {
-          fetch(`/tasks/delete/${taskId}/`, {
-            method: 'POST',
-            headers: {
-              'X-CSRFToken': csrfToken
-            }
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              alert("✅ تم حذف المهمة بنجاح");
-              location.reload();
-            } else {
-              alert("❌ فشل في الحذف: " + (data.error || "خطأ غير معروف"));
-            }
-          })
-          .catch(err => {
-            alert("❌ حدث خطأ أثناء الحذف");
-            console.error(err);
-          });
-        }
+        Swal.fire({
+          title: 'تأكيد الحذف',
+          text: 'هل أنت متأكد أنك تريد حذف هذه المهمة؟',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'نعم، احذف',
+          cancelButtonText: 'إلغاء',
+          confirmButtonColor: '#ff7675',
+          cancelButtonColor: '#999',
+          customClass: { popup: 'swal2-rounded' }
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch(`/tasks/delete/${taskId}/`, {
+              method: 'POST',
+              headers: {
+                'X-CSRFToken': csrfToken
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'تم الحذف',
+                  text: 'تم حذف المهمة بنجاح',
+                  confirmButtonColor: '#5DE6A9',
+                  customClass: { popup: 'swal2-rounded' }
+                }).then(() => location.reload());
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'فشل الحذف',
+                  text: data.error || "خطأ غير معروف",
+                  confirmButtonColor: '#ff7675',
+                  customClass: { popup: 'swal2-rounded' }
+                });
+              }
+            })
+            .catch(err => {
+              Swal.fire({
+                icon: 'error',
+                title: 'خطأ في الاتصال',
+                text: 'حدث خطأ أثناء الحذف',
+                confirmButtonColor: '#ff7675',
+                customClass: { popup: 'swal2-rounded' }
+              });
+              console.error(err);
+            });
+          }
+        });
       });
     });
   });
