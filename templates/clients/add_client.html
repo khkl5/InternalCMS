@@ -25,6 +25,10 @@
 
 {% block extra_css %}
 <style>
+* {
+  box-sizing: border-box;
+}
+
 body {
   background-color: #F0F4F8;
   font-family: 'Tajawal', sans-serif;
@@ -69,12 +73,40 @@ body {
 .form-fields input,
 .form-fields textarea {
   width: 100%;
-  padding: 10px;
+  padding: 10px 14px;
   border: 1px solid #8EBABF;
-  border-radius: 6px;
+  border-radius: 10px;
   font-size: 15px;
-  background-color: #F9FBFC;
+  background-color: #ffffff;
+  transition: border 0.2s ease;
 }
+
+.form-fields input:focus,
+.form-fields textarea:focus {
+  border-color: #2EC6F3;
+  outline: none;
+}
+.form-fields select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #8EBABF;
+  border-radius: 10px;
+  font-size: 15px;
+  background-color: #ffffff;
+  appearance: none; /* يخفي سهم المتصفح */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 140 140' width='16' height='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='0,0 140,0 70,100' fill='%238EBABF'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 1rem center;
+  background-size: 12px;
+  cursor: pointer;
+  transition: border 0.2s ease;
+}
+
+.form-fields select:focus {
+  border-color: #2EC6F3;
+  outline: none;
+}
+
 
 .btn-group {
   display: flex;

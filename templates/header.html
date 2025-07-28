@@ -24,7 +24,8 @@
   </div>
   <div class="dropdown-menu">
     <a href="{% url 'profile' %}">حسابي</a>
-    <a href="{% url 'logout' %}">تسجيل الخروج</a>
+    <a href="{% url 'logout' %}" class="logout-link">تسجيل الخروج</a>
+
   </div>
 </div>
 
@@ -133,21 +134,23 @@
   top: 100%;
   right: 0;
   background-color: #ffffff;
-  min-width: 150px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  padding: 8px 0;
+  min-width: 180px; /* 🟢 أوسع شوي */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 10px 0;
   z-index: 999;
   text-align: right;
-  margin-top: 4px;
+  margin-top: 6px;
+  pointer-events: auto; /* 🟢 أفضل للتفاعل */
+  transition: opacity 0.2s ease;
 }
 
 .dropdown-menu a {
   display: block;
-  padding: 10px 16px;
+  padding: 12px 18px; /* 🟢 أكبر للتفاعل المريح */
   text-decoration: none;
   color: #2F4157;
-  font-size: 0.95rem;
+  font-size: 1rem;
   transition: background-color 0.2s;
 }
 
@@ -156,9 +159,25 @@
   color: #000;
 }
 
+/* 🟥 تمييز رابط تسجيل الخروج */
+.dropdown-menu a.logout-link {
+  color: #f44336;
+  font-weight: 600;
+}
+.dropdown-menu a.logout-link:hover {
+  background-color: #ffeaea;
+  color: #d32f2f;
+}
+
+/* 🟢 عرض بثبات بدون ما تختفي بسرعة */
+.user-dropdown {
+  position: relative;
+  display: inline-block;
+}
 .user-dropdown:hover .dropdown-menu {
   display: block;
 }
+
 
 /* تعديل على user-info علشان يحافظ على التوسيط الصحيح */
 .user-info {

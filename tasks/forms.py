@@ -1,12 +1,20 @@
 from django import forms
 from .models import Task
 from django.contrib.auth.models import User
+from content.models import Document  # تأكدي من المسار الصحيح للموديل
 
 class TaskForm(forms.ModelForm):
     file = forms.FileField(
         required=False,
         label="مرفق المهمة (اختياري)",
         help_text="مثل PDF أو صورة"
+    )
+
+    documents = forms.ModelMultipleChoiceField(
+        queryset=Document.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="المستندات المرتبطة"
     )
 
     class Meta:

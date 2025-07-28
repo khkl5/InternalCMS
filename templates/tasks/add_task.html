@@ -8,10 +8,29 @@
 
     <form id="add-task-form" method="post" enctype="multipart/form-data">
       {% csrf_token %}
-
       <div class="form-fields">
-        {{ form.as_p }}
-      </div>
+  <p>{{ form.title.label_tag }}<br>{{ form.title }}</p>
+
+  <p>{{ form.description.label_tag }}<br>{{ form.description }}</p>
+
+  <p>{{ form.assigned_to.label_tag }}<br>{{ form.assigned_to }}</p>
+
+  <p>{{ form.client.label_tag }}<br>{{ form.client }}</p>
+
+  <p>{{ form.status.label_tag }}<br>{{ form.status }}</p>
+
+  <p>{{ form.due_date.label_tag }}<br>{{ form.due_date }}</p>
+
+
+  <p>{{ form.documents.label }}</p>
+  
+  <div class="checkbox-list">
+    {{ form.documents }}
+  </div>
+  <p>{{ form.file.label_tag }}<br>{{ form.file }}</p>
+
+</div>
+
 
       <button type="submit" class="submit-btn">إنشاء المهمة</button>
     </form>
@@ -21,7 +40,10 @@
 
 {% block extra_css %}
 <style>
-/* ... نفس ستايلك السابق ... */
+* {
+  box-sizing: border-box;
+}
+
 body {
   background-color: #F0F4F8;
   font-family: 'Tajawal', sans-serif;
@@ -61,11 +83,19 @@ body {
 .form-fields select,
 .form-fields textarea {
   width: 100%;
-  padding: 10px;
+  padding: 10px 14px;
   border: 1px solid #8EBABF;
-  border-radius: 6px;
+  border-radius: 10px;
   font-size: 15px;
-  background-color: #F9FBFC;
+  background-color: #ffffff;
+  transition: border 0.2s;
+}
+
+.form-fields input:focus,
+.form-fields select:focus,
+.form-fields textarea:focus {
+  border-color: #2EC6F3;
+  outline: none;
 }
 .submit-btn {
   width: 100%;
@@ -82,6 +112,46 @@ body {
 .submit-btn:hover {
   opacity: 0.9;
 }
+.checkbox-list {
+  max-height: 200px;            /* ارتفاع ثابت */
+  overflow-y: auto;             /* تمكين التمرير العمودي */
+  border: 1px solid #8EBABF;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  background-color: #F9FBFC;
+}
+
+/* ✅ تنسيق العناصر داخل القائمة */
+.checkbox-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.checkbox-list li {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+  direction: rtl;
+}
+
+.checkbox-list input[type="checkbox"] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: #2EC6F3;
+}
+
+.checkbox-list label {
+  margin: 0;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+
 </style>
 {% endblock %}
 
@@ -137,6 +207,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+  document.addEventListener('DOMContentLoaded', function () {
+    flatpickr("#id_due_date", {
+      dateFormat: "Y-m-d",      // تنسيق التاريخ
+      locale: "ar",             // اللغة العربية
+      allowInput: true,         // ✅ يسمح بالكتابة اليدوية
+      disableMobile: true       // لإظهار flatpickr بدلاً من تقويم الجوال الافتراضي
+    });
+  });
+
 </script>
 
 

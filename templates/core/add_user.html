@@ -35,12 +35,24 @@
 
       <div class="form-group">
         <label for="id_department">القسم</label>
-        {{ form.department }}
+        <select name="department" id="id_department" required>
+          <option value="">اختر القسم</option>
+          <option value="hr">الموارد البشرية</option>
+          <option value="it">تقنية المعلومات</option>
+          <option value="design">التصميم</option>
+          <option value="marketing">التسويق</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label for="id_role">الدور</label>
-        {{ form.role }}
+        <select name="role" id="id_role" required>
+          <option value="">اختر الدور</option>
+          <option value="admin">مدير</option>
+          <option value="staff">موظف</option>
+          <option value="viewer">مشاهد</option>
+
+        </select>
       </div>
 
       <button type="submit" class="submit-btn">إضافة المستخدم</button>
@@ -51,10 +63,16 @@
 
 {% block extra_css %}
 <style>
+* {
+  box-sizing: border-box;
+}
+
 body {
   background-color: #F0F4F8;
   font-family: 'Tajawal', sans-serif;
 }
+
+
 
 .add-staff-container {
   display: flex;
@@ -92,8 +110,7 @@ body {
   color: #2F4157;
 }
 
-.form-group input,
-.form-group select {
+.form-group input {
   width: 100%;
   padding: 10px;
   border: 1px solid #8EBABF;
@@ -101,6 +118,21 @@ body {
   font-size: 15px;
   background-color: #F9FBFC;
 }
+.form-group select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #8EBABF;
+  border-radius: 10px;
+  font-size: 15px;
+  background-color: #ffffff;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%238EBABF' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 1rem center;
+  background-size: 12px 8px;
+  cursor: pointer;
+}
+
 
 .submit-btn {
   width: 100%;
