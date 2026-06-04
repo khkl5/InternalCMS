@@ -1,2 +1,1 @@
-web: gunicorn InternalCMS.wsgi --log-file -
-release: python manage.py migrate
+web: gunicorn InternalCMS.wsgi:application --bind 0.0.0.0:$PORT --log-file -
