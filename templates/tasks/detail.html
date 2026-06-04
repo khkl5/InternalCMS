@@ -1,45 +1,83 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}تفاصيل المهمة | مركز الملفات{% endblock %}
+
 {% block content %}
-<div class="container" style="padding: 20px;">
-  <h2>📋 تفاصيل المهمة</h2>
-
-  <div style="margin-top: 15px;">
-    <p><strong>📌 العنوان:</strong> {{ task.title }}</p>
-    <p><strong>📝 الوصف:</strong> {{ task.description|default:"لا يوجد وصف" }}</p>
-    <p><strong>📅 تاريخ الاستحقاق:</strong> {{ task.due_date|default:"غير محدد" }}</p>
-    <p>
-      <strong>⚙️ الحالة:</strong>
-      {% if task.status == 'pending' %}
-        <span style="color: orange;">⏳ قيد التنفيذ</span>
-      {% elif task.status == 'completed' %}
-        <span style="color: green;">✅ منتهية</span>
-      {% elif task.status == 'overdue' %}
-        <span style="color: red;">⏰ متأخرة</span>
-      {% endif %}
-    </p>
-    <p><strong>👤 الموظف المكلّف:</strong> {{ task.assigned_to.username|default:"غير محدد" }}</p>
-    <p><strong>👥 العميل:</strong> {{ task.client.name|default:"غير محدد" }}</p>
-
-    {% if task.file_url %}
-      <p><strong>📎 الملف المرفق:</strong> 
-        <a href="{{ task.file_url }}" target="_blank" style="color: blue;">تحميل الملف</a>
-      </p>
-    {% endif %}
-
-    {% if task.documents.all %}
-      <p><strong>📁 مستندات إضافية:</strong></p>
-      <ul>
-        {% for doc in task.documents.all %}
-          <li>
-            <a href="{{ doc.file_url }}" target="_blank">{{ doc.title }}</a>
-          </li>
-        {% empty %}
-          <li>لا توجد مستندات إضافية</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
+<section class="page-shell">
+  <div class="page-heading">
+    <div class="page-heading-copy">
+      <h1>{{ task.title }}</h1>
+      <p>تفاصيل المهمة والموظف والملفات المرتبطة بها.</p>
+    </div>
+    <div class="page-actions">
+      <a href="{% url 'task_list' %}" class="app-button secondary">
+        <i data-lucide="arrow-right"></i>
+        المهام
+      </a>
+    </div>
   </div>
 
-  <a href="{% url 'task_list' %}" class="button" style="display: inline-block; margin-top: 20px;">⬅️ العودة لقائمة المهام</a>
-</div>
+  <div class="surface">
+    <div class="surface-header">
+      <h2>تفاصيل المهمة</h2>
+      {% if task.status == "pending" %}
+        <span class="status-pill status-pending">قيد التنفيذ</span>
+      {% elif task.status == "completed" %}
+        <span class="status-pill status-completed">مكتملة</span>
+      {% else %}
+        <span class="status-pill status-overdue">متأخرة</span>
+      {% endif %}
+    </div>
+    <dl class="detail-grid">
+      <div class="detail-item full">
+        <dt>الوصف</dt>
+        <dd>{{ task.description|default:"لا يوجد وصف" }}</dd>
+      </div>
+      <div class="detail-item">
+        <dt>الموظف المكلّف</dt>
+        <dd>{{ task.assigned_to.get_full_name|default:task.assigned_to.username|default:"غير محدد" }}</dd>
+      </div>
+      <div class="detail-item">
+        <dt>العميل</dt>
+        <dd>{{ task.client.name|default:"غير محدد" }}</dd>
+      </div>
+      <div class="detail-item">
+        <dt>تاريخ الاستحقاق</dt>
+        <dd>{{ task.due_date|date:"Y/m/d"|default:"غير محدد" }}</dd>
+      </div>
+      <div class="detail-item">
+        <dt>المرفق</dt>
+        <dd>
+          {% if task.file_url %}
+            <a href="{{ task.file_url }}" target="_blank" class="app-button small secondary">
+              <i data-lucide="download"></i>
+              تنزيل الملف
+            </a>
+          {% else %}
+            لا يوجد ملف مرفق
+          {% endif %}
+        </dd>
+      </div>
+      <div class="detail-item full">
+        <dt>المستندات المرتبطة</dt>
+        <dd>
+          {% if visible_documents %}
+            <ul class="document-links">
+              {% for doc in visible_documents %}
+                <li>
+                  <a href="{{ doc.file_url }}" target="_blank">
+                    <i data-lucide="file-text"></i>
+                    {{ doc.title }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            لا توجد مستندات إضافية.
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
+  </div>
+</section>
 {% endblock %}

@@ -1,163 +1,159 @@
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.views.decorators.http import require_POST
-from core.decorators import role_required
-from core.supabase_utils import upload_to_supabase
-from clients.models import Client
-from .forms import TaskForm
-from .models import Task
-from content.models import Document
 import json
 import logging
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.http import require_POST
+
+from clients.models import Client
+from content.permissions import visible_documents_for
+from core.decorators import get_user_role, role_required
+from core.supabase_utils import upload_to_supabase
+from utils.supabase_client import create_signed_file_url, delete_file
+
+from .access import attach_task_download_url, can_view_task
+from .forms import TaskForm
+from .models import Task
+
 logger = logging.getLogger(__name__)
 
-# ✅ عرض قائمة المهام (عرض تقليدي)
-@login_required
-@role_required(['admin', 'staff'])
+
+def _save_task(form, client=None):
+    task = form.save(commit=False)
+    if client is not None:
+        task.client = client
+
+    uploaded_path = ""
+    uploaded_file = form.files.get("file")
+    try:
+        if uploaded_file:
+            uploaded_path = upload_to_supabase(uploaded_file, uploaded_file.name)
+            task.file_path = uploaded_path
+        task.save()
+        form.save_m2m()
+    except Exception:
+        if uploaded_path:
+            try:
+                delete_file(uploaded_path)
+            except Exception:
+                logger.exception("Failed to clean up an incomplete task upload")
+        raise
+    return task
+
+
+@role_required(["admin", "staff"])
 def task_list_view(request):
-    user = request.user
-    role = user.userprofile.role.name
-    if role == 'admin':
-        tasks = Task.objects.all()
+    if get_user_role(request.user) == "admin":
+        tasks = list(Task.objects.select_related("assigned_to", "client"))
     else:
-        tasks = Task.objects.filter(assigned_to=user)
-    return render(request, 'tasks/list.html', {'all_tasks': tasks})
+        tasks = list(
+            Task.objects.filter(assigned_to=request.user).select_related("assigned_to", "client")
+        )
+    for task in tasks:
+        attach_task_download_url(task)
+    return render(request, "tasks/list.html", {"all_tasks": tasks})
 
-# ✅ عرض تفاصيل مهمة
-@login_required
+
+@role_required(["admin", "staff"])
 def task_detail_view(request, task_id):
-    task = get_object_or_404(Task, id=task_id)
-    return render(request, 'tasks/detail.html', {'task': task})
+    task = get_object_or_404(Task.objects.select_related("assigned_to", "client"), id=task_id)
+    if not can_view_task(request.user, task):
+        return render(request, "403.html", status=403)
 
-# ✅ إضافة مهمة (دعم AJAX فقط)
-@login_required
-@role_required(['admin'])
+    attach_task_download_url(task)
+    visible_documents = list(
+        task.documents.filter(
+            pk__in=visible_documents_for(request.user).values("pk")
+        ).select_related("uploaded_by", "client")
+    )
+    for document in visible_documents:
+        try:
+            document.file_url = create_signed_file_url(document.file_path)
+        except Exception:
+            logger.exception("Failed to create a signed URL for document %s", document.pk)
+            document.file_url = ""
+
+    return render(
+        request,
+        "tasks/detail.html",
+        {"task": task, "visible_documents": visible_documents},
+    )
+
+
+@role_required(["admin"])
 def add_task_view(request):
-    if request.method == 'POST':
-        form = TaskForm(request.POST, request.FILES)
-        if form.is_valid():
-            task = form.save(commit=False)
-            uploaded_file = request.FILES.get('file')
-            if uploaded_file:
-                try:
-                    public_url, file_path = upload_to_supabase(uploaded_file, uploaded_file.name)
-                    task.file_url = public_url
-                    task.file_path = file_path
-                except Exception as e:
-                    logger.error(f"فشل رفع الملف: {e}", exc_info=True)
-                    return JsonResponse({'success': False, 'error': f'فشل رفع الملف: {e}'})
-            task.save()
-            form.save_m2m()
-            return JsonResponse({'success': True, 'message': "تم إنشاء المهمة بنجاح."})
-        else:
-            return JsonResponse({'success': False, 'error': 'البيانات غير صالحة أو ناقصة.'})
-    else:
-        form = TaskForm()
-    return render(request, 'tasks/add_task.html', {'form': form})
+    form = TaskForm(request.POST or None, request.FILES or None)
+    if request.method == "POST":
+        if not form.is_valid():
+            return JsonResponse(
+                {"success": False, "error": "البيانات غير صالحة أو ناقصة."},
+                status=400,
+            )
+        try:
+            _save_task(form)
+        except Exception:
+            logger.exception("Failed to create a task")
+            return JsonResponse(
+                {"success": False, "error": "تعذر إنشاء المهمة. يرجى المحاولة لاحقًا."},
+                status=502,
+            )
+        return JsonResponse({"success": True, "message": "تم إنشاء المهمة بنجاح."})
 
-# ✅ إضافة مهمة مرتبطة بعميل (AJAX فقط)
-@login_required
-@role_required(['admin'])
+    return render(request, "tasks/add_task.html", {"form": form})
+
+
+@role_required(["admin"])
 def add_task_for_client(request, client_id):
     client = get_object_or_404(Client, id=client_id)
-    if request.method == 'POST':
-        form = TaskForm(request.POST, request.FILES)
-        if form.is_valid():
-            task = form.save(commit=False)
-            task.client = client
-            uploaded_file = request.FILES.get('file')
-            if uploaded_file:
-                try:
-                    public_url, file_path = upload_to_supabase(uploaded_file, uploaded_file.name)
-                    task.file_url = public_url
-                    task.file_path = file_path
-                except Exception as e:
-                    logger.error(f"فشل رفع الملف: {e}", exc_info=True)
-                    return JsonResponse({'success': False, 'error': f'فشل رفع الملف: {e}'})
-            task.save()
-            form.save_m2m()
-            return JsonResponse({'success': True, 'message': "تمت إضافة المهمة لهذا العميل بنجاح."})
-        else:
-            return JsonResponse({'success': False, 'error': 'البيانات غير صالحة أو ناقصة.'})
-    else:
-        form = TaskForm()
-    return render(request, 'tasks/add_task.html', {'form': form, 'client': client})
+    form = TaskForm(request.POST or None, request.FILES or None)
+    if request.method == "POST":
+        if not form.is_valid():
+            return JsonResponse(
+                {"success": False, "error": "البيانات غير صالحة أو ناقصة."},
+                status=400,
+            )
+        try:
+            _save_task(form, client=client)
+        except Exception:
+            logger.exception("Failed to create a task for client %s", client.pk)
+            return JsonResponse(
+                {"success": False, "error": "تعذر إنشاء المهمة. يرجى المحاولة لاحقًا."},
+                status=502,
+            )
+        return JsonResponse(
+            {"success": True, "message": "تمت إضافة المهمة لهذا العميل بنجاح."}
+        )
 
-# ✅ تحديث حالة المهمة (AJAX فقط)
+    return render(request, "tasks/add_task.html", {"form": form, "client": client})
+
+
 @require_POST
-@login_required
-@role_required(['admin', 'staff'])
+@role_required(["admin", "staff"])
 def update_task_status(request, task_id):
     try:
         data = json.loads(request.body)
-        new_status = data.get('status')
-        if new_status not in ['pending', 'completed', 'overdue']:
-            return JsonResponse({'success': False, 'error': 'الحالة غير صالحة'})
-        task = get_object_or_404(Task, pk=task_id)
-        if request.user != task.assigned_to and request.user.userprofile.role.name != 'admin':
-            return JsonResponse({'success': False, 'error': 'غير مصرح لك بتعديل هذه المهمة'})
-        task.status = new_status
-        task.save()
-        return JsonResponse({'success': True, 'message': 'تم تحديث الحالة بنجاح'})
     except json.JSONDecodeError:
-        return JsonResponse({'success': False, 'error': 'تنسيق البيانات غير صالح'})
-    except Exception as e:
-        logger.error(f"خطأ أثناء تحديث حالة المهمة: {e}", exc_info=True)
-        return JsonResponse({'success': False, 'error': str(e)})
+        return JsonResponse({"success": False, "error": "تنسيق البيانات غير صالح"}, status=400)
 
-# ✅ حذف مهمة (AJAX فقط)
-@login_required
-@role_required(['admin'])
+    new_status = data.get("status")
+    if new_status not in dict(Task.STATUS_CHOICES):
+        return JsonResponse({"success": False, "error": "الحالة غير صالحة"}, status=400)
+
+    task = get_object_or_404(Task, pk=task_id)
+    if get_user_role(request.user) != "admin" and request.user != task.assigned_to:
+        return JsonResponse(
+            {"success": False, "error": "غير مصرح لك بتعديل هذه المهمة"},
+            status=403,
+        )
+
+    task.status = new_status
+    task.save(update_fields=["status"])
+    return JsonResponse({"success": True, "message": "تم تحديث الحالة بنجاح"})
+
+
 @require_POST
+@role_required(["admin"])
 def delete_task_view(request, task_id):
-    try:
-        task = get_object_or_404(Task, id=task_id)
-        task.delete()
-        return JsonResponse({'success': True, 'message': 'تم حذف المهمة بنجاح'})
-    except Exception as e:
-        logger.error(f"خطأ عند حذف المهمة: {e}", exc_info=True)
-        return JsonResponse({'success': False, 'error': str(e)})
-
-# ✅ لوحة تحكم المدير (عرض تقليدي)
-@login_required
-@role_required(['admin'])
-def admin_dashboard_view(request):
-    total_tasks = Task.objects.count()
-    tasks_completed = Task.objects.filter(status='completed').count()
-    total_documents = Document.objects.count()
-    total_clients = Client.objects.count()
-    latest_tasks = Task.objects.all()[:5]
-    context = {
-        'total_tasks': total_tasks,
-        'tasks_completed': tasks_completed,
-        'total_documents': total_documents,
-        'total_clients': total_clients,
-        'latest_tasks': latest_tasks,
-        'role': request.user.userprofile.role.name,
-    }
-    return render(request, 'core/admin_dashboard.html', context)
-
-# ✅ لوحة تحكم الموظف (عرض تقليدي)
-@login_required
-@role_required(['staff'])
-def staff_dashboard_view(request):
-    user = request.user
-    role = user.userprofile.role.name
-    tasks = Task.objects.filter(assigned_to=user)
-    total_tasks = tasks.count()
-    tasks_completed = tasks.filter(status='completed').count()
-    tasks_pending = tasks.exclude(status='completed').count()
-    total_documents = Document.objects.filter(uploaded_by=user).count()
-    total_clients = Client.objects.filter(assigned_to=user).count()
-    latest_tasks = tasks.order_by('-created_at')[:3]
-    return render(request, 'core/staff_dashboard.html', {
-        'role': role,
-        'total_tasks': total_tasks,
-        'tasks_completed': tasks_completed,
-        'tasks_pending': tasks_pending,
-        'total_documents': total_documents,
-        'total_clients': total_clients,
-        'latest_tasks': latest_tasks,
-    })
+    task = get_object_or_404(Task, id=task_id)
+    task.delete()
+    return JsonResponse({"success": True, "message": "تم حذف المهمة بنجاح"})

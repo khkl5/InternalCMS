@@ -4,12 +4,14 @@ from core.decorators import role_required
 from .models import Client
 from .forms import ClientForm
 from tasks.models import Task
+from tasks.access import attach_task_download_url
+from core.decorators import get_user_role
 
 @login_required
 @role_required(['admin', 'staff'])
 def client_list(request):
     user = request.user
-    if user.userprofile.role.name == 'admin':
+    if get_user_role(user) == 'admin':
         clients = Client.objects.all()
     else:
         clients = Client.objects.filter(assigned_to=user)
@@ -32,12 +34,16 @@ def client_tasks(request, client_id):
     client = get_object_or_404(Client, id=client_id)
 
     # التحقق من صلاحية الوصول
-    if request.user.userprofile.role.name != 'admin' and client.assigned_to != request.user:
-        return render(request, '403.html')
+    role = get_user_role(request.user)
+    if role != 'admin' and client.assigned_to != request.user:
+        return render(request, '403.html', status=403)
 
-    tasks = Task.objects.filter(client=client).order_by('-created_at')
+    tasks = list(Task.objects.filter(client=client).select_related('assigned_to').order_by('-created_at'))
+    for task in tasks:
+        attach_task_download_url(task)
     
     return render(request, 'clients/client_tasks.html', {
         'client': client,
-        'tasks': tasks
+        'tasks': tasks,
+        'role': role,
     })

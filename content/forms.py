@@ -1,9 +1,14 @@
 from django import forms
 from django.contrib.auth.models import User
+from core.file_validation import validate_uploaded_file
 from .models import Document
 
 class DocumentUploadForm(forms.ModelForm):
-    file = forms.FileField(label='اختر الملف', required=True)
+    file = forms.FileField(
+        label='اختر الملف',
+        required=True,
+        validators=[validate_uploaded_file],
+    )
 
     allowed_users = forms.ModelMultipleChoiceField(
         queryset=User.objects.none(),  # سيتم تعيينها في __init__

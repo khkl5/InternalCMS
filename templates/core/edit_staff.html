@@ -1,235 +1,82 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}تعديل موظف{% endblock %}
+{% block title %}تعديل مستخدم | مركز الملفات{% endblock %}
 
 {% block content %}
-<div class="clients-container">
-  <div class="clients-card">
-    <div class="header-row">
-      <h2>✏️ تعديل بيانات الموظف</h2>
-      <a href="{% url 'staff_list' %}" class="add-client-btn" style="background: #f1f5f9; color: #2F4157; border: 1px solid #EAF7FA;">← الرجوع لقائمة الموظفين</a>
+<section class="form-shell">
+  <div class="surface form-surface">
+    <div class="form-header">
+      <div>
+        <h1>تعديل بيانات المستخدم</h1>
+        <p>{{ user_obj.get_full_name|default:user_obj.username }}</p>
+      </div>
+      <a href="{% url 'staff_list' %}" class="app-button secondary">
+        <i data-lucide="arrow-right"></i>
+        المستخدمون
+      </a>
     </div>
 
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
-
-    <form method="post" enctype="multipart/form-data" class="edit-form" id="edit-staff-form">
+    <form method="post" class="app-form" id="edit-staff-form">
       {% csrf_token %}
       <div class="form-grid">
         {% for field in form %}
-          {% if field.name == 'role' %}
-            <div class="form-group">
-              <label for="{{ field.id_for_label }}">الدور</label>
-              <select name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-control">
-                {% for val, label in form.fields.role.choices %}
-                  <option value="{{ val }}" {% if field.value == val %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-              </select>
-              {% if field.help_text %}
-                <small class="form-text text-muted">{{ field.help_text }}</small>
-              {% endif %}
-              {% for error in field.errors %}
-                <div class="error-text">{{ error }}</div>
-              {% endfor %}
-            </div>
-          {% else %}
-            <div class="form-group">
-              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-              {{ field }}
-              {% if field.help_text %}
-                <small class="form-text text-muted">{{ field.help_text }}</small>
-              {% endif %}
-              {% for error in field.errors %}
-                <div class="error-text">{{ error }}</div>
-              {% endfor %}
-            </div>
-          {% endif %}
+          <div class="field {% if field.name == 'is_active' %}full{% endif %}">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+            {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          </div>
         {% endfor %}
       </div>
-      <button type="submit" class="task-btn" style="margin-top:20px;">💾 حفظ التعديلات</button>
+      <div class="form-actions">
+        <a href="{% url 'staff_list' %}" class="app-button secondary">إلغاء</a>
+        <button type="submit" class="app-button">
+          <i data-lucide="save"></i>
+          حفظ التعديلات
+        </button>
+      </div>
     </form>
 
-    <!-- مربع التحذير المنبثق عند تغيير الدور -->
     <div id="role-warning-modal" style="display:none;">
       <div class="modal-overlay"></div>
       <div class="modal-content">
-        <p style="color:#E84A5F;font-weight:bold;">⚠️ هل أنت متأكد من تغيير دور الموظف؟<br>قد يؤثر ذلك على صلاحياته في النظام!</p>
-        <button id="confirm-role-change" class="task-btn" style="background-color:#2EC6F3;">تأكيد التغيير</button>
-        <button id="cancel-role-change" class="task-btn" style="background-color:#f85d7a;">إلغاء</button>
+        <h2>تأكيد تغيير الدور</h2>
+        <p>قد يؤثر تغيير الدور على صلاحيات المستخدم في النظام.</p>
+        <div class="form-actions">
+          <button type="button" id="cancel-role-change" class="app-button secondary">إلغاء</button>
+          <button type="button" id="confirm-role-change" class="app-button">تأكيد التغيير</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-/* نفس التنسيق السابق تمامًا */
-body {
-  background-color: #F0F4F8;
-  font-family: 'Tajawal', sans-serif;
-}
-
-.clients-container {
-  display: flex;
-  justify-content: center;
-  padding-top: 80px;
-  padding-bottom: 40px;
-}
-
-.clients-card {
-  background: #fff;
-  padding: 30px 25px;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  width: 100%;
-  max-width: 550px;
-  color: #2F4157;
-}
-
-.header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-}
-
-.add-client-btn {
-  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
-  color: white;
-  padding: 8px 15px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 0.95rem;
-  border: none;
-  transition: background 0.3s;
-  font-weight: bold;
-}
-.add-client-btn:hover {
-  opacity: 0.9;
-}
-
-.edit-form .form-grid {
-  display: grid;
-  gap: 18px;
-}
-.edit-form .form-group {
-  display: flex;
-  flex-direction: column;
-}
-.edit-form label {
-  margin-bottom: 7px;
-  color: #2F4157;
-  font-weight: bold;
-}
-.edit-form input, .edit-form select, .edit-form textarea {
-  padding: 8px 10px;
-  border: 1px solid #e0e6ed;
-  border-radius: 8px;
-  background: #f7fafc;
-  font-family: 'Tajawal', sans-serif;
-  font-size: 1rem;
-  transition: border 0.2s;
-}
-.edit-form input:focus, .edit-form select:focus, .edit-form textarea:focus {
-  border: 1.5px solid #2EC6F3;
-  outline: none;
-}
-.edit-form small.form-text {
-  color: #999;
-  margin-top: 2px;
-}
-.error-text {
-  color: #f85d7a;
-  font-size: 0.92em;
-  margin-top: 2px;
-}
-
-.task-btn {
-  background-color: #2EC6F3;
-  color: white;
-  padding: 9px 28px;
-  border-radius: 8px;
-  border: none;
-  font-size: 1rem;
-  font-family: 'Tajawal', sans-serif;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.task-btn:hover {
-  background-color: #199ec2;
-}
-.alert {
-  padding: 10px 15px;
-  border-radius: 8px;
-  margin-bottom: 18px;
-  font-size: 0.97rem;
-}
-.alert-success { background: #E6FFFA; color: #008f6a; }
-.alert-danger, .alert-error { background: #FFE7EA; color: #E84A5F; }
-.alert-warning { background: #FFF4E5; color: #FF9800; }
-
-/* منبّه التحذير */
-.modal-overlay {
-  position: fixed; left:0; top:0; right:0; bottom:0;
-  background: rgba(30,40,80,0.23);
-  z-index: 999;
-}
-.modal-content {
-  position: fixed;
-  top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(80,80,120,0.18);
-  padding: 32px 30px 18px;
-  z-index: 1000;
-  text-align: center;
-}
-</style>
+</section>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // حدد select الجديد للدور
-    var roleField = document.querySelector('[name="role"]');
-    var initialRole = roleField ? roleField.value : null;
-    var form = document.getElementById('edit-staff-form');
-    var modal = document.getElementById('role-warning-modal');
-    var confirmBtn = document.getElementById('confirm-role-change');
-    var cancelBtn = document.getElementById('cancel-role-change');
-    var roleChanged = false;
+document.addEventListener("DOMContentLoaded", function () {
+  const roleField = document.querySelector('[name="role"]');
+  const initialRole = roleField?.value;
+  const form = document.getElementById("edit-staff-form");
+  const modal = document.getElementById("role-warning-modal");
+  let roleChanged = false;
 
-    if(roleField){
-        roleField.addEventListener('change', function(e) {
-            roleChanged = (roleField.value !== initialRole);
-        });
-    }
-
-    form.addEventListener('submit', function(e){
-        if(roleChanged) {
-            e.preventDefault();
-            modal.style.display = 'block';
-        }
-    });
-
-    if(confirmBtn){
-        confirmBtn.onclick = function() {
-            modal.style.display = 'none';
-            roleChanged = false; // حتى لا تظهر الرسالة مرة ثانية
-            form.submit();
-        };
-    }
-    if(cancelBtn){
-        cancelBtn.onclick = function() {
-            modal.style.display = 'none';
-        };
-    }
+  roleField?.addEventListener("change", function () {
+    roleChanged = roleField.value !== initialRole;
+  });
+  form.addEventListener("submit", function (event) {
+    if (!roleChanged) return;
+    event.preventDefault();
+    modal.style.display = "block";
+  });
+  document.getElementById("cancel-role-change").addEventListener("click", function () {
+    modal.style.display = "none";
+  });
+  document.getElementById("confirm-role-change").addEventListener("click", function () {
+    roleChanged = false;
+    modal.style.display = "none";
+    form.submit();
+  });
 });
 </script>
 {% endblock %}

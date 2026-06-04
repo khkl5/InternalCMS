@@ -1,195 +1,123 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}مهام العميل: {{ client.name }}{% endblock %}
+{% block title %}مهام {{ client.name }} | مركز الملفات{% endblock %}
 
 {% block content %}
-<div class="tasks-container">
-  <div class="tasks-card">
-    <div class="header-row">
-      <h2>📋 مهام العميل: {{ client.name }}</h2>
-      <a href="{% url 'add_task_for_client' client.id %}" class="add-task-btn">+ إضافة مهمة جديدة</a>
+<section class="page-shell">
+  <div class="page-heading">
+    <div class="page-heading-copy">
+      <h1>مهام {{ client.name }}</h1>
+      <p>متابعة جميع المهام والملفات المرتبطة بهذا العميل.</p>
     </div>
-
-    <table class="tasks-table">
-      <thead>
-        <tr>
-          <th>العنوان</th>
-          <th>الوصف</th>
-          <th>الموظف</th>
-          <th>الحالة</th>
-          <th>تاريخ الإنشاء</th>
-          <th>تاريخ التسليم</th>
-          <th>الملف</th>
-          <th>الإجراءات</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for task in tasks %}
-        <tr>
-          <td>{{ task.title }}</td>
-          <td class="desc-cell">{{ task.description|truncatewords:10 }}</td>
-          <td>
-            {# يدعم الاسم الكامل من UserProfile أو من المستخدم الافتراضي أو fallback لليوزرنيم #}
-            {% if task.assigned_to %}
-              {% if task.assigned_to.userprofile.full_name %}
-                {{ task.assigned_to.userprofile.full_name }}
-              {% elif task.assigned_to.get_full_name %}
-                {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
-              {% else %}
-                {{ task.assigned_to.username }}
-              {% endif %}
-            {% else %}
-              -
-            {% endif %}
-          </td>
-          <td>
-            {% if task.status == 'pending' %}
-              <span class="badge badge-warning">قيد التنفيذ</span>
-            {% elif task.status == 'completed' %}
-              <span class="badge badge-success">منتهية</span>
-            {% elif task.status == 'overdue' %}
-              <span class="badge badge-danger">متأخرة</span>
-            {% endif %}
-          </td>
-          <td>{{ task.created_at|date:"Y-m-d" }}</td>
-          <td>{{ task.due_date|default:"-" }}</td>
-          <td>
-            {% if task.file_url %}
-              <a href="{{ task.file_url }}" target="_blank" class="btn btn-sm btn-outline-info">📄 عرض</a>
-            {% else %}
-              -
-            {% endif %}
-          </td>
-          <td>
-            <form method="post" action="{% url 'delete_task' task.id %}" onsubmit="return confirm('هل أنت متأكد من حذف المهمة؟');">
-              {% csrf_token %}
-              <button class="btn btn-sm btn-outline-danger" title="حذف المهمة">🗑</button>
-            </form>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="8" class="empty-row">لا توجد مهام لهذا العميل.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-    <a href="{% url 'client_list' %}" class="back-btn">← رجوع لقائمة العملاء</a>
+    <div class="page-actions">
+      <a href="{% url 'client_list' %}" class="app-button secondary">
+        <i data-lucide="arrow-right"></i>
+        العملاء
+      </a>
+      {% if role == "admin" %}
+        <a href="{% url 'add_task_for_client' client.id %}" class="app-button">
+          <i data-lucide="plus"></i>
+          إضافة مهمة
+        </a>
+      {% endif %}
+    </div>
   </div>
-</div>
+
+  <div class="surface">
+    <div class="surface-header">
+      <h2>قائمة المهام</h2>
+      <span class="cell-secondary">{{ tasks|length }} مهمة</span>
+    </div>
+    <div class="table-shell">
+      <table class="app-table">
+        <thead>
+          <tr>
+            <th>المهمة</th>
+            <th>الموظف</th>
+            <th>الحالة</th>
+            <th>تاريخ التسليم</th>
+            <th>الملف</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks %}
+            <tr>
+              <td>
+                <div class="cell-primary">{{ task.title }}</div>
+                <div class="cell-secondary">{{ task.description|truncatewords:8|default:"لا يوجد وصف" }}</div>
+              </td>
+              <td>{{ task.assigned_to.get_full_name|default:task.assigned_to.username|default:"غير مسندة" }}</td>
+              <td>
+                {% if task.status == "pending" %}
+                  <span class="status-pill status-pending">قيد التنفيذ</span>
+                {% elif task.status == "completed" %}
+                  <span class="status-pill status-completed">منتهية</span>
+                {% else %}
+                  <span class="status-pill status-overdue">متأخرة</span>
+                {% endif %}
+              </td>
+              <td>{{ task.due_date|date:"Y/m/d"|default:"—" }}</td>
+              <td>
+                {% if task.file_url %}
+                  <a href="{{ task.file_url }}" target="_blank" class="app-button small secondary">
+                    <i data-lucide="paperclip"></i>
+                    عرض
+                  </a>
+                {% else %}
+                  <span class="cell-secondary">لا يوجد</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="row-actions">
+                  <a href="{% url 'task_detail' task.id %}" class="app-button small secondary">التفاصيل</a>
+                  {% if role == "admin" %}
+                    <button type="button" class="app-button small danger client-delete-task" data-task-id="{{ task.id }}">
+                      <i data-lucide="trash-2"></i>
+                      حذف
+                    </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="empty-row">لا توجد مهام لهذا العميل.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-body {
-  background-color: #F0F4F8;
-  font-family: 'Tajawal', sans-serif;
-}
-
-.tasks-container {
-  display: flex;
-  justify-content: center;
-  padding-top: 80px;
-  padding-bottom: 40px;
-}
-
-.tasks-card {
-  background: #fff;
-  padding: 30px 25px;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  max-width: 1000px;
-  width: 100%;
-  color: #2F4157;
-}
-
-.header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.add-task-btn {
-  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
-  color: white;
-  padding: 8px 15px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 0.95rem;
-}
-
-.add-task-btn:hover {
-  opacity: 0.9;
-}
-
-.tasks-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-}
-
-.tasks-table th,
-.tasks-table td {
-  padding: 12px;
-  text-align: center;
-  border-bottom: 1px solid #e0e6ed;
-}
-
-.tasks-table thead {
-  background-color: #EAF7FA;
-}
-
-.tasks-table tbody tr:hover {
-  background-color: #f5f9fc;
-}
-
-.tasks-table .desc-cell {
-  text-align: start;
-}
-
-.badge {
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  display: inline-block;
-}
-
-.badge-warning {
-  background-color: #ffeaa7;
-  color: #555;
-}
-
-.badge-success {
-  background-color: #55efc4;
-  color: #2d3436;
-}
-
-.badge-danger {
-  background-color: #ff7675;
-  color: #fff;
-}
-
-.empty-row {
-  text-align: center;
-  color: #777;
-  font-size: 0.95rem;
-}
-
-.back-btn {
-  background-color: #d9dfe4;
-  color: #333;
-  padding: 10px 20px;
-  font-size: 0.95rem;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: background 0.3s;
-}
-
-.back-btn:hover {
-  background-color: #c0c8cf;
-}
-</style>
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const csrfToken = "{{ csrf_token }}";
+  document.querySelectorAll(".client-delete-task").forEach(function (button) {
+    button.addEventListener("click", function () {
+      Swal.fire({
+        title: "تأكيد الحذف",
+        text: "هل أنت متأكد من حذف هذه المهمة؟",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "نعم، احذف",
+        cancelButtonText: "إلغاء",
+        confirmButtonColor: "#d73543"
+      }).then(function (result) {
+        if (!result.isConfirmed) return;
+        fetch(`/tasks/delete/${button.dataset.taskId}/`, {
+          method: "POST",
+          headers: { "X-CSRFToken": csrfToken }
+        }).then(function (response) {
+          if (!response.ok) throw new Error("delete failed");
+          button.closest("tr").remove();
+        }).catch(function () {
+          Swal.fire({ icon: "error", title: "تعذر الحذف", confirmButtonColor: "#1677ff" });
+        });
+      });
+    });
+  });
+});
+</script>
 {% endblock %}

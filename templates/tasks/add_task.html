@@ -1,222 +1,85 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends "base.html" %}
+
+{% block title %}إضافة مهمة | مركز الملفات{% endblock %}
 
 {% block content %}
-<div class="add-task-container">
-  <div class="add-task-card">
-    <h2>📝 إضافة مهمة جديدة</h2>
+<section class="form-shell">
+  <div class="surface form-surface">
+    <div class="form-header">
+      <div>
+        <h1>{% if client %}إضافة مهمة إلى {{ client.name }}{% else %}إضافة مهمة جديدة{% endif %}</h1>
+        <p>حدد تفاصيل المهمة والموظف المسؤول وتاريخ الاستحقاق.</p>
+      </div>
+      <a href="{% if client %}{% url 'client_tasks' client.id %}{% else %}{% url 'task_list' %}{% endif %}" class="app-button secondary">
+        <i data-lucide="arrow-right"></i>
+        العودة
+      </a>
+    </div>
 
-    <form id="add-task-form" method="post" enctype="multipart/form-data">
+    <form id="add-task-form" method="post" enctype="multipart/form-data" class="app-form">
       {% csrf_token %}
-      <div class="form-fields">
-  <p>{{ form.title.label_tag }}<br>{{ form.title }}</p>
-
-  <p>{{ form.description.label_tag }}<br>{{ form.description }}</p>
-
-  <p>{{ form.assigned_to.label_tag }}<br>{{ form.assigned_to }}</p>
-
-  <p>{{ form.client.label_tag }}<br>{{ form.client }}</p>
-
-  <p>{{ form.status.label_tag }}<br>{{ form.status }}</p>
-
-  <p>{{ form.due_date.label_tag }}<br>{{ form.due_date }}</p>
-
-
-  <p>{{ form.documents.label }}</p>
-  
-  <div class="checkbox-list">
-    {{ form.documents }}
-  </div>
-  <p>{{ form.file.label_tag }}<br>{{ form.file }}</p>
-
-</div>
-
-
-      <button type="submit" class="submit-btn">إنشاء المهمة</button>
+      <div class="form-grid">
+        {% for field in form %}
+          {% if not client or field.name != "client" %}
+            <div class="field {% if field.name == 'description' or field.name == 'documents' or field.name == 'file' %}full{% endif %}">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {% if field.name == "documents" %}
+                <div class="checkbox-panel">{{ field }}</div>
+              {% else %}
+                {{ field }}
+              {% endif %}
+              {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+              {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="form-actions">
+        <a href="{% if client %}{% url 'client_tasks' client.id %}{% else %}{% url 'task_list' %}{% endif %}" class="app-button secondary">إلغاء</a>
+        <button type="submit" class="app-button">
+          <i data-lucide="save"></i>
+          إنشاء المهمة
+        </button>
+      </div>
     </form>
   </div>
-</div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  background-color: #F0F4F8;
-  font-family: 'Tajawal', sans-serif;
-}
-.add-task-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-top: 80px;
-  padding-bottom: 40px;
-}
-.add-task-card {
-  background: #ffffff;
-  padding: 30px 25px;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-  max-width: 600px;
-  width: 100%;
-  color: #2F4157;
-}
-.add-task-card h2 {
-  text-align: center;
-  margin-bottom: 25px;
-  font-size: 1.4rem;
-  color: #2F4157;
-}
-.form-fields p {
-  margin-bottom: 15px;
-}
-.form-fields label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #2F4157;
-}
-.form-fields input,
-.form-fields select,
-.form-fields textarea {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1px solid #8EBABF;
-  border-radius: 10px;
-  font-size: 15px;
-  background-color: #ffffff;
-  transition: border 0.2s;
-}
-
-.form-fields input:focus,
-.form-fields select:focus,
-.form-fields textarea:focus {
-  border-color: #2EC6F3;
-  outline: none;
-}
-.submit-btn {
-  width: 100%;
-  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
-  color: white;
-  border: none;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: opacity 0.3s ease;
-  margin-top: 10px;
-}
-.submit-btn:hover {
-  opacity: 0.9;
-}
-.checkbox-list {
-  max-height: 200px;            /* ارتفاع ثابت */
-  overflow-y: auto;             /* تمكين التمرير العمودي */
-  border: 1px solid #8EBABF;
-  border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 20px;
-  background-color: #F9FBFC;
-}
-
-/* ✅ تنسيق العناصر داخل القائمة */
-.checkbox-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.checkbox-list li {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  margin-bottom: 10px;
-  direction: rtl;
-}
-
-.checkbox-list input[type="checkbox"] {
-  margin: 0;
-  width: 16px;
-  height: 16px;
-  accent-color: #2EC6F3;
-}
-
-.checkbox-list label {
-  margin: 0;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-
-</style>
+</section>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('add-task-form');
-  const csrfToken = '{{ csrf_token }}';
+document.addEventListener("DOMContentLoaded", function () {
+  flatpickr("#id_due_date", {
+    dateFormat: "Y-m-d",
+    locale: "ar",
+    allowInput: true,
+    disableMobile: true
+  });
 
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const formData = new FormData(form);
-
+  const form = document.getElementById("add-task-form");
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
     fetch(window.location.pathname, {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': csrfToken
-      },
-      body: formData
+      method: "POST",
+      headers: { "X-CSRFToken": "{{ csrf_token }}" },
+      body: new FormData(form)
     })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        Swal.fire({
-          icon: 'success',
-          title: 'نجاح',
-          text: data.message || 'تم إنشاء المهمة بنجاح!',
-          confirmButtonColor: '#5DE6A9',
-          customClass: { popup: 'swal2-rounded' }
-        }).then(() => {
-          window.location.href = '{% url "task_list" %}';  // إلى صفحة قائمة المهام
-        });
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'خطأ',
-          text: data.error || 'حدث خطأ أثناء إنشاء المهمة!',
-          confirmButtonColor: '#ff7675',
-          customClass: { popup: 'swal2-rounded' }
-        });
-      }
-    })
-    .catch(err => {
+    .then(function (response) { return response.json(); })
+    .then(function (data) {
+      if (!data.success) throw new Error(data.error || "create failed");
       Swal.fire({
-        icon: 'error',
-        title: 'خطأ في الاتصال',
-        text: 'حدث خطأ أثناء الاتصال بالخادم',
-        confirmButtonColor: '#ff7675',
-        customClass: { popup: 'swal2-rounded' }
+        icon: "success",
+        title: "تم إنشاء المهمة",
+        text: data.message,
+        confirmButtonColor: "#1677ff"
+      }).then(function () {
+        window.location.href = "{% if client %}{% url 'client_tasks' client.id %}{% else %}{% url 'task_list' %}{% endif %}";
       });
-      console.error(err);
+    })
+    .catch(function (error) {
+      Swal.fire({ icon: "error", title: "تعذر إنشاء المهمة", text: error.message, confirmButtonColor: "#1677ff" });
     });
   });
 });
-  document.addEventListener('DOMContentLoaded', function () {
-    flatpickr("#id_due_date", {
-      dateFormat: "Y-m-d",      // تنسيق التاريخ
-      locale: "ar",             // اللغة العربية
-      allowInput: true,         // ✅ يسمح بالكتابة اليدوية
-      disableMobile: true       // لإظهار flatpickr بدلاً من تقويم الجوال الافتراضي
-    });
-  });
-
 </script>
-
-
 {% endblock %}

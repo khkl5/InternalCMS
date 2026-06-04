@@ -1,154 +1,42 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends "base.html" %}
+
+{% block title %}إضافة مستخدم | مركز الملفات{% endblock %}
 
 {% block content %}
-<div class="add-staff-container">
-  <div class="add-staff-card">
-    <h2>➕ إضافة مستخدم جديد</h2>
-    <form method="post" action="{% url 'add_user' %}">
+<section class="form-shell">
+  <div class="surface form-surface">
+    <div class="form-header">
+      <div>
+        <h1>إضافة مستخدم جديد</h1>
+        <p>أنشئ حسابًا جديدًا وحدد الدور والقسم المناسبين.</p>
+      </div>
+      <a href="{% url 'staff_list' %}" class="app-button secondary">
+        <i data-lucide="arrow-right"></i>
+        المستخدمون
+      </a>
+    </div>
+
+    <form method="post" class="app-form">
       {% csrf_token %}
-
-      <div class="form-group">
-        <label for="id_full_name">الاسم الكامل</label>
-        {{ form.full_name }}
+      <div class="form-grid">
+        {% for field in form %}
+          <div class="field {% if field.name == 'full_name' %}full{% endif %}">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+            {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          </div>
+        {% endfor %}
       </div>
-
-      <div class="form-group">
-        <label for="id_username">اسم المستخدم</label>
-        {{ form.username }}
+      {% for error in form.non_field_errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+      <div class="form-actions">
+        <a href="{% url 'staff_list' %}" class="app-button secondary">إلغاء</a>
+        <button type="submit" class="app-button">
+          <i data-lucide="user-plus"></i>
+          إضافة المستخدم
+        </button>
       </div>
-
-      <div class="form-group">
-        <label for="id_password">كلمة المرور</label>
-        {{ form.password }}
-      </div>
-
-      <div class="form-group">
-        <label for="id_email">البريد الإلكتروني</label>
-        {{ form.email }}
-      </div>
-
-      <div class="form-group">
-        <label for="id_phone_number">رقم الجوال</label>
-        {{ form.phone_number }}
-      </div>
-
-      <div class="form-group">
-        <label for="id_department">القسم</label>
-        <select name="department" id="id_department" required>
-          <option value="">اختر القسم</option>
-          <option value="hr">الموارد البشرية</option>
-          <option value="it">تقنية المعلومات</option>
-          <option value="design">التصميم</option>
-          <option value="marketing">التسويق</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="id_role">الدور</label>
-        <select name="role" id="id_role" required>
-          <option value="">اختر الدور</option>
-          <option value="admin">مدير</option>
-          <option value="staff">موظف</option>
-          <option value="viewer">مشاهد</option>
-
-        </select>
-      </div>
-
-      <button type="submit" class="submit-btn">إضافة المستخدم</button>
     </form>
   </div>
-</div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  background-color: #F0F4F8;
-  font-family: 'Tajawal', sans-serif;
-}
-
-
-
-.add-staff-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-top: 80px;
-  padding-bottom: 40px;
-}
-
-.add-staff-card {
-  background: #ffffff;
-  padding: 30px 25px;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-  max-width: 500px;
-  width: 100%;
-  color: #2F4157;
-}
-
-.add-staff-card h2 {
-  text-align: center;
-  margin-bottom: 25px;
-  font-size: 1.4rem;
-  color: #2F4157;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #2F4157;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #8EBABF;
-  border-radius: 6px;
-  font-size: 15px;
-  background-color: #F9FBFC;
-}
-.form-group select {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1px solid #8EBABF;
-  border-radius: 10px;
-  font-size: 15px;
-  background-color: #ffffff;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%238EBABF' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: left 1rem center;
-  background-size: 12px 8px;
-  cursor: pointer;
-}
-
-
-.submit-btn {
-  width: 100%;
-  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
-  color: white;
-  border: none;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: opacity 0.3s ease;
-  margin-top: 10px;
-}
-
-.submit-btn:hover {
-  opacity: 0.9;
-}
-</style>
+</section>
 {% endblock %}

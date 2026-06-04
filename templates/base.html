@@ -1,106 +1,624 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}Internal CMS{% endblock %}</title>
-  <!-- Flatpickr CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<!-- دعم اللغة العربية -->
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}مركز الملفات{% endblock %}</title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
-<style>
-  /* 1. إعدادات الصفحة العامة */
-  html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-    font-family: 'Tajawal', sans-serif;
-    background-color: #F4EFEB;
-    color: #2F4157;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* 2. تغليف كامل الصفحة */
-  .layout-wrapper {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-
-  /* 3. الجسم الداخلي يحتوي على sidebar والمحتوى */
-  .layout-body {
-    display: flex;
-    flex: 1;
-  }
-
-  /* 4. المحتوى الرئيسي */
-  .main-content {
-    flex: 1;
-    margin-right: 240px;
-    padding: 20px;
-    padding-top: 80px;
-  }
-
-  /* 5. دعم الشاشات الصغيرة */
-  @media (max-width: 768px) {
-    .main-content {
-      margin-right: 0;
-      padding: 14px;
-      padding-top: 90px;
+  <style>
+    :root {
+      --navy-950: #061d3b;
+      --navy-900: #08294f;
+      --navy-800: #0d3766;
+      --blue-600: #0967e8;
+      --blue-500: #1677ff;
+      --blue-100: #e8f1ff;
+      --ink-900: #0b2142;
+      --ink-700: #40536d;
+      --ink-500: #708096;
+      --line: #dfe6ef;
+      --surface: #ffffff;
+      --canvas: #f8fafc;
+      --success: #169b5a;
+      --warning: #d67b00;
+      --danger: #d73543;
+      --sidebar-width: 248px;
+      --topbar-height: 104px;
+      --shadow-sm: 0 2px 8px rgba(8, 41, 79, 0.05);
     }
-  }
 
-  /* 6. SweetAlert تخصيص */
-  .swal2-popup.swal2-rounded {
-    border-radius: 20px !important;
-    font-family: 'Tajawal', sans-serif;
-  }
-</style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--canvas);
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      background: var(--canvas);
+      color: var(--ink-900);
+      font-family: "Tajawal", Tahoma, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .layout-wrapper {
+      min-height: 100vh;
+    }
+
+    .layout-body {
+      min-height: 100vh;
+    }
+
+    .main-content {
+      min-height: calc(100vh - 56px);
+      margin-right: var(--sidebar-width);
+      padding: calc(var(--topbar-height) + 34px) 28px 42px;
+    }
+
+    .topbar {
+      position: fixed;
+      z-index: 900;
+      top: 0;
+      right: var(--sidebar-width);
+      left: 0;
+      height: var(--topbar-height);
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.97);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .mobile-menu-button {
+      display: none;
+      width: 42px;
+      height: 42px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink-900);
+      cursor: pointer;
+    }
+
+    .global-search {
+      position: relative;
+      width: min(56vw, 690px);
+      margin: 0 auto;
+    }
+
+    .global-search input {
+      width: 100%;
+      height: 54px;
+      padding: 0 52px 0 18px;
+      border: 1px solid #ced8e5;
+      border-radius: 5px;
+      outline: none;
+      background: #fff;
+      color: var(--ink-900);
+      font-size: 0.98rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .global-search input:focus {
+      border-color: var(--blue-500);
+      box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
+    }
+
+    .global-search button {
+      position: absolute;
+      top: 50%;
+      right: 17px;
+      display: inline-flex;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #53657e;
+      cursor: pointer;
+      transform: translateY(-50%);
+    }
+
+    .topbar-actions {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex: 0 0 auto;
+    }
+
+    .icon-button {
+      position: relative;
+      display: inline-flex;
+      width: 42px;
+      height: 42px;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--ink-900);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .icon-button:hover,
+    .icon-button[aria-expanded="true"] {
+      background: #f0f5fb;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -2px;
+      right: 0;
+      min-width: 19px;
+      height: 19px;
+      padding: 0 5px;
+      border: 2px solid #fff;
+      border-radius: 20px;
+      background: var(--blue-600);
+      color: #fff;
+      font-size: 0.69rem;
+      font-weight: 700;
+      line-height: 15px;
+      text-align: center;
+    }
+
+    .topbar-separator {
+      width: 1px;
+      height: 34px;
+      background: var(--line);
+    }
+
+    .user-menu-button {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 4px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--ink-900);
+      text-align: right;
+      cursor: pointer;
+    }
+
+    .user-menu-button:hover,
+    .user-menu-button[aria-expanded="true"] {
+      background: #f4f7fb;
+    }
+
+    .avatar-initials {
+      display: inline-flex;
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #cbd7e6;
+      border-radius: 50%;
+      background: #eef4fb;
+      color: var(--navy-800);
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .user-copy {
+      display: grid;
+      min-width: 122px;
+      gap: 2px;
+    }
+
+    .user-copy strong {
+      overflow: hidden;
+      font-size: 0.98rem;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-copy small {
+      color: var(--ink-500);
+      font-size: 0.8rem;
+    }
+
+    .popover {
+      position: absolute;
+      z-index: 1100;
+      top: calc(100% + 16px);
+      left: 0;
+      display: none;
+      width: 280px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 18px 44px rgba(8, 41, 79, 0.16);
+    }
+
+    .popover.open {
+      display: block;
+    }
+
+    .popover-header {
+      padding: 15px 17px;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .popover-content {
+      padding: 14px 17px;
+      color: var(--ink-700);
+      font-size: 0.86rem;
+      line-height: 1.7;
+    }
+
+    .popover-link,
+    .popover button {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 17px;
+      border: 0;
+      border-top: 1px solid #edf1f5;
+      background: #fff;
+      color: var(--ink-700);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .popover-link:hover,
+    .popover button:hover {
+      background: #f6f9fc;
+      color: var(--blue-600);
+    }
+
+    .sidebar {
+      position: fixed;
+      z-index: 1000;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      width: var(--sidebar-width);
+      flex-direction: column;
+      overflow-y: auto;
+      background: var(--navy-900);
+      color: #eef6ff;
+      box-shadow: -7px 0 25px rgba(5, 27, 54, 0.12);
+    }
+
+    .sidebar-brand {
+      display: flex;
+      min-height: var(--topbar-height);
+      align-items: center;
+      gap: 12px;
+      padding: 0 27px;
+      font-size: 1.12rem;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .sidebar-brand svg {
+      width: 35px;
+      height: 35px;
+      stroke-width: 1.7px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 11px;
+      padding: 18px 10px;
+    }
+
+    .sidebar-nav a,
+    .sidebar-nav button {
+      display: flex;
+      min-height: 64px;
+      width: 100%;
+      align-items: center;
+      gap: 16px;
+      padding: 0 20px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: #e7f0fb;
+      font-family: inherit;
+      font-size: 0.98rem;
+      font-weight: 500;
+      text-align: right;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav button:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .sidebar-nav a.active {
+      background: var(--blue-500);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(0, 95, 224, 0.22);
+    }
+
+    .sidebar-nav svg {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
+      stroke-width: 1.8px;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .sidebar-overlay {
+      position: fixed;
+      z-index: 950;
+      inset: 0;
+      display: none;
+      background: rgba(5, 25, 49, 0.44);
+    }
+
+    .main-footer {
+      margin-right: var(--sidebar-width);
+      padding: 17px 28px;
+      border-top: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink-500);
+      font-size: 0.78rem;
+      text-align: center;
+    }
+
+    .main-footer p {
+      margin: 0;
+    }
+
+    .swal2-popup.swal2-rounded {
+      border-radius: 10px !important;
+      font-family: "Tajawal", Tahoma, sans-serif;
+    }
+
+    @media (max-width: 1120px) {
+      .topbar {
+        gap: 12px;
+      }
+
+      .global-search {
+        width: min(47vw, 560px);
+      }
+
+      .user-copy {
+        display: none;
+      }
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --topbar-height: 76px;
+      }
+
+      .sidebar {
+        width: 260px;
+        transform: translateX(105%);
+        transition: transform 0.24s ease;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay.open {
+        display: block;
+      }
+
+      .topbar {
+        right: 0;
+        gap: 10px;
+        padding: 0 14px;
+      }
+
+      .mobile-menu-button {
+        display: inline-flex;
+      }
+
+      .global-search {
+        width: auto;
+        flex: 1;
+      }
+
+      .global-search input {
+        height: 44px;
+        padding-right: 43px;
+        font-size: 0.84rem;
+      }
+
+      .topbar-actions {
+        gap: 5px;
+      }
+
+      .topbar-separator,
+      .user-menu-button .avatar-initials,
+      .user-menu-button > svg {
+        display: none;
+      }
+
+      .user-menu-button {
+        width: 42px;
+        height: 42px;
+        justify-content: center;
+      }
+
+      .user-menu-button::after {
+        content: attr(data-initial);
+        display: inline-flex;
+        width: 34px;
+        height: 34px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #eef4fb;
+        color: var(--navy-800);
+        font-weight: 800;
+      }
+
+      .popover {
+        position: fixed;
+        top: 68px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+      }
+
+      .main-content {
+        margin-right: 0;
+        padding: calc(var(--topbar-height) + 24px) 14px 30px;
+      }
+
+      .main-footer {
+        margin-right: 0;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar .notification-control {
+        display: none;
+      }
+
+      .global-search input::placeholder {
+        color: transparent;
+      }
+    }
+  </style>
 
   {% block extra_css %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'css/app-pages.css' %}">
 </head>
-
 <body>
   <div class="layout-wrapper">
-    {% include 'header.html' %}
+    {% include "header.html" %}
     <div class="layout-body">
-      {% include 'core/sidebar.html' %}
+      {% include "core/sidebar.html" %}
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-      <div class="main-content">
+      <main class="main-content">
         {% block content %}{% endblock %}
-      </div>
+      </main>
     </div>
-    {% include 'footer.html' %}
+    {% include "footer.html" %}
   </div>
 
-  <!-- SweetAlert2 -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ar.js"></script>
+  <script src="https://unpkg.com/lucide@0.544.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.23.0"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+
+      const sidebar = document.getElementById("sidebar");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+      const menuButton = document.getElementById("mobileMenuButton");
+
+      function closeSidebar() {
+        sidebar?.classList.remove("open");
+        sidebarOverlay?.classList.remove("open");
+        menuButton?.setAttribute("aria-expanded", "false");
+      }
+
+      menuButton?.addEventListener("click", function () {
+        const isOpen = sidebar?.classList.toggle("open");
+        sidebarOverlay?.classList.toggle("open", isOpen);
+        menuButton.setAttribute("aria-expanded", String(Boolean(isOpen)));
+      });
+      sidebarOverlay?.addEventListener("click", closeSidebar);
+
+      const popoverButtons = document.querySelectorAll("[data-popover-target]");
+      function closePopovers(exceptId) {
+        popoverButtons.forEach(function (button) {
+          const id = button.dataset.popoverTarget;
+          if (id !== exceptId) {
+            document.getElementById(id)?.classList.remove("open");
+            button.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
+
+      popoverButtons.forEach(function (button) {
+        button.addEventListener("click", function (event) {
+          event.stopPropagation();
+          const popover = document.getElementById(button.dataset.popoverTarget);
+          const willOpen = !popover?.classList.contains("open");
+          closePopovers(willOpen ? button.dataset.popoverTarget : null);
+          popover?.classList.toggle("open", willOpen);
+          button.setAttribute("aria-expanded", String(willOpen));
+        });
+      });
+
+      document.querySelectorAll(".popover").forEach(function (popover) {
+        popover.addEventListener("click", function (event) {
+          event.stopPropagation();
+        });
+      });
+
+      document.addEventListener("click", function () {
+        closePopovers();
+      });
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          closePopovers();
+          closeSidebar();
+        }
+      });
+    });
+  </script>
 
   {% if messages %}
     {% for message in messages %}
       <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener("DOMContentLoaded", function () {
           Swal.fire({
-            icon: '{{ message.tags|default:"info" }}',
-            title: '{% if "success" in message.tags %}تم بنجاح{% elif "error" in message.tags %}حدث خطأ{% else %}تنبيه{% endif %}',
-            text: '{{ message|escapejs }}',
-            confirmButtonText: 'إغلاق',
-            confirmButtonColor: '{% if "success" in message.tags %}#28a745{% elif "error" in message.tags %}#dc3545{% else %}#3085d6{% endif %}',
-            customClass: {
-              popup: 'swal2-rounded'
-            }
+            icon: "{{ message.tags|default:'info' }}",
+            title: "{% if 'success' in message.tags %}تم بنجاح{% elif 'danger' in message.tags or 'error' in message.tags %}حدث خطأ{% else %}تنبيه{% endif %}",
+            text: "{{ message|escapejs }}",
+            confirmButtonText: "إغلاق",
+            confirmButtonColor: "#1677ff",
+            customClass: { popup: "swal2-rounded" }
           });
         });
       </script>

@@ -16,7 +16,6 @@ class Task(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='الحالة')
     due_date = models.DateField(null=True, blank=True, verbose_name='تاريخ الاستحقاق')
 
-    file_url = models.URLField(max_length=1024, blank=True, null=True, verbose_name='رابط الملف')
     file_path = models.CharField(max_length=512, blank=True, null=True, verbose_name='مسار الملف')
     
     # ❗ كتابة المسار كنص لحل مشكلة الاستيراد الدائري + تدقيق الأدوات

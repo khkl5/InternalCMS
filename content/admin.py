@@ -1,62 +1,58 @@
-from django.contrib import admin
-from django import forms
-from .models import Document
-from django.conf import settings
-import re
-import unicodedata
-import uuid
+import logging
 
-# دالة تنظيف اسم الملف
-def slugify_filename(filename):
-    name, ext = filename.rsplit('.', 1)
-    name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore').decode('ascii')
-    name = re.sub(r'[^a-zA-Z0-9_-]+', '-', name).strip('-')
-    unique_suffix = uuid.uuid4().hex[:8]  # نحط جزء عشوائي للتفادي التكرار
-    return f"{name}-{unique_suffix}.{ext}"
+from django import forms
+from django.contrib import admin
+
+from core.file_validation import validate_uploaded_file
+from utils.supabase_client import delete_file, upload_file
+
+from .models import Document
+from .utils import slugify_filename
+
+logger = logging.getLogger(__name__)
+
 
 class DocumentAdminForm(forms.ModelForm):
-    upload_file = forms.FileField(required=False, label='رفع ملف')
+    upload_file = forms.FileField(
+        required=False,
+        label="رفع ملف",
+        validators=[validate_uploaded_file],
+    )
 
     class Meta:
         model = Document
-        fields = '__all__'
+        fields = "__all__"
+
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
     form = DocumentAdminForm
-    list_display = ('title', 'uploaded_by', 'client', 'access_level', 'created_at', 'file_url')
-    list_display_links = ('title',)
-    search_fields = ('title', 'uploaded_by__username')
-    list_filter = ('access_level', 'created_at', 'uploaded_by')
-    ordering = ('-created_at',)
+    list_display = ("title", "uploaded_by", "client", "access_level", "created_at")
+    list_display_links = ("title",)
+    search_fields = ("title", "uploaded_by__username")
+    list_filter = ("access_level", "created_at", "uploaded_by")
+    ordering = ("-created_at",)
 
     def save_model(self, request, obj, form, change):
-        upload_file = form.cleaned_data.get('upload_file')
+        uploaded_file = form.cleaned_data.get("upload_file")
+        old_path = ""
+        if change:
+            old_path = (
+                Document.objects.filter(pk=obj.pk).values_list("file_path", flat=True).first()
+                or ""
+            )
 
-        if upload_file:
-            bucket_name = settings.SUPABASE_STORAGE_BUCKET
-            safe_filename = slugify_filename(upload_file.name)
-            bucket_file_path = f"uploads/documents/{safe_filename}"
+        if uploaded_file:
+            new_path = f"uploads/documents/{slugify_filename(uploaded_file.name)}"
+            upload_file(uploaded_file, new_path)
+            obj.file_path = new_path
+        if not obj.uploaded_by_id:
+            obj.uploaded_by = request.user
 
-            # نقرأ الملف bytes
-            file_bytes = upload_file.file.read()
-
-            # رفع إلى supabase
-            #supabase.storage.from_(bucket_name).upload(
-                #path=bucket_file_path,
-               # file=file_bytes,
-                #file_options={ "contentType": upload_file.content_type }
-           # )#
-
-            # Signed URL لمدة يوم
-            #signed_url_resp = supabase.storage.from_(bucket_name).create_signed_url(
-             #   path=bucket_file_path,
-             #   expires_in=86400
-           # )
-
-            # نخزن البيانات في الموديل
-            obj.file_path = bucket_file_path
-           # obj.file_url = signed_url_resp.get('signedURL')
-
-        # حفظ الموديل
         super().save_model(request, obj, form, change)
+
+        if uploaded_file and old_path and old_path != obj.file_path:
+            try:
+                delete_file(old_path)
+            except Exception:
+                logger.exception("Failed to delete replaced admin upload %s", old_path)

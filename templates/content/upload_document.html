@@ -1,259 +1,88 @@
-{% extends 'base.html' %}
-{% load widget_tweaks %}
-{% load static %}
+{% extends "base.html" %}
 
-{% block title %}رفع مستند جديد{% endblock %}
+{% block title %}رفع مستند | مركز الملفات{% endblock %}
 
 {% block content %}
-<div class="upload-docs-container">
-  <div class="upload-docs-card">
-    <div class="upload-docs-header">
-      
-      <h2>رفع مستند جديد</h2>
+<section class="form-shell">
+  <div class="surface form-surface">
+    <div class="form-header">
+      <div>
+        <h1>رفع مستند جديد</h1>
+        <p>أضف بيانات المستند وحدد مستوى الوصول المناسب.</p>
+      </div>
+      <a href="{% url 'document_list' %}" class="app-button secondary">
+        <i data-lucide="arrow-right"></i>
+        المستندات
+      </a>
     </div>
 
-    <form method="post" enctype="multipart/form-data" novalidate>
+    <form method="post" enctype="multipart/form-data" class="app-form" novalidate>
       {% csrf_token %}
-
-      <div class="form-group">
-        <label for="id_title">عنوان المستند</label>
-        {{ form.title|add_class:"form-control-input" }}
+      <div class="form-grid">
+        <div class="field full">
+          <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+          {{ form.title }}
+          {% for error in form.title.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field" id="client-group">
+          <label for="{{ form.client.id_for_label }}">{{ form.client.label }}</label>
+          {{ form.client }}
+          {% for error in form.client.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field">
+          <label for="{{ form.access_level.id_for_label }}">{{ form.access_level.label }}</label>
+          {{ form.access_level }}
+          {% for error in form.access_level.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field full" id="allowed-users-group">
+          <label>{{ form.allowed_users.label }}</label>
+          <div class="checkbox-panel">{{ form.allowed_users }}</div>
+          {% for error in form.allowed_users.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field full">
+          <label for="{{ form.file.id_for_label }}">{{ form.file.label }}</label>
+          {{ form.file }}
+          <small class="field-help" id="file-name">لم يتم اختيار أي ملف.</small>
+          {% for error in form.file.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+        </div>
       </div>
-      <div class="form-group" id="client-group">
-        <label for="id_client">العميل المرتبط</label>
-        {{ form.client|add_class:"form-select-input" }}
+      {% for error in form.non_field_errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+      <div class="form-actions">
+        <a href="{% url 'document_list' %}" class="app-button secondary">إلغاء</a>
+        <button type="submit" class="app-button">
+          <i data-lucide="upload"></i>
+          رفع المستند
+        </button>
       </div>
-      <div id="allowed-users-group" class="form-group">
-
-        <label>الموظفون المسموح لهم (للمستند المقيّد فقط)</label>
-        {{ form.allowed_users }}
-      </div>
-
-      <div class="form-group">
-        <label for="id_access_level">مستوى الوصول</label>
-        {{ form.access_level|add_class:"form-select-input" }}
-      </div>     
-      <div class="form-group">
-        <label for="id_file">اختر الملف</label>
-        {{ form.file|add_class:"form-control-input" }}
-        <small id="file-name" class="file-info">لم يتم اختيار أي ملف.</small>
-      </div>
-
-      <button type="submit" class="submit-btn">
-        <span class="btn-icon">📎</span> رفع المستند
-      </button>
     </form>
   </div>
-</div>
-
-<script>
-document.getElementById('id_file').addEventListener('change', function () {
-  const fileName = this.files[0]?.name || "لم يتم اختيار أي ملف.";
-  document.getElementById('file-name').textContent = "الملف المحدد: " + fileName;
-});
-</script>
+</section>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  background-color: #F0F4F8;
-  font-family: 'Tajawal', sans-serif;
-}
-
-.upload-docs-container {
-  min-height: 85vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px 1rem;
-}
-
-.upload-docs-card {
-  background-color: #ffffff;
-  padding: 30px 25px;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  max-width: 500px;
-  width: 100%;
-  color: #2F4157;
-}
-
-.upload-docs-header {
-  text-align: center;
-  margin-bottom: 25px;
-}
-
-.upload-docs-header h2 {
-  font-size: 1.4rem;
-  color: #2F4157;
-  margin: 0;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #2F4157;
-  font-size: 15px;
-}
-
-.form-control-input,
-.form-select-input,
-select,
-textarea,
-input[type="text"],
-input[type="file"] {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1px solid #8EBABF;
-  border-radius: 10px;
-  font-size: 1rem;
-  background-color: #F9FBFC;
-  color: #2F4157;
-  transition: border 0.2s ease;
-  outline: none;
-  margin-top: 2px;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: #2EC6F3;
-  background-color: #e7faff;
-}
-
-.submit-btn {
-  width: 100%;
-  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
-  color: white;
-  border: none;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: opacity 0.3s ease;
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-}
-
-.submit-btn:hover {
-  opacity: 0.9;
-}
-
-.file-info {
-  display: block;
-  margin-top: 6px;
-  color: #249891;
-  background: #e7faff;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 0.93em;
-  font-weight: 500;
-  border: 1px solid #c8f1ed;
-}
-
-/* قائمة المستخدمين المسموح لهم */
-#allowed-users-group ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  max-height: 150px;
-  overflow-y: auto;
-  border: 1px solid #2ec6f3;
-  background-color: #e7faff;
-  border-radius: 10px;
-  width: 100%;
-  scrollbar-width: thin;
-  scrollbar-color: #2ec6f3 #e7faff;
-}
-
-#allowed-users-group ul::-webkit-scrollbar {
-  width: 6px;
-}
-
-#allowed-users-group ul::-webkit-scrollbar-thumb {
-  background-color: #2ec6f3;
-  border-radius: 6px;
-}
-
-#allowed-users-group li {
-  display: flex;
-  align-items: center;
-  padding: 6px 10px;
-}
-
-#allowed-users-group label {
-  margin-right: 8px;
-  font-weight: 500;
-  color: #1c6c80;
-  cursor: pointer;
-}
-
-#allowed-users-group input[type="checkbox"] {
-  accent-color: #2ec6f3;
-  width: 18px;
-  height: 18px;
-  margin-left: 6px;
-}
-</style>
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-function toggleDynamicFields() {
-  const accessLevel = document.getElementById('id_access_level').value;
-  const clientGroup = document.getElementById('client-group');
-  const allowedUsersGroup = document.getElementById('allowed-users-group');
-  const clientInput = document.getElementById('id_client');
-  const allowedUsersInput = document.getElementById('id_allowed_users');
+function toggleDocumentFields() {
+  const accessLevel = document.getElementById("id_access_level");
+  const clientGroup = document.getElementById("client-group");
+  const allowedUsersGroup = document.getElementById("allowed-users-group");
+  const clientInput = document.getElementById("id_client");
+  const restricted = accessLevel?.value === "restricted";
+  const clientShared = accessLevel?.value === "client_shared";
 
-  if (accessLevel === 'client_shared') {
-    clientGroup.style.display = 'block';
-    clientInput.required = true;
-  } else {
-    clientGroup.style.display = 'none';
-    clientInput.required = false;
-    clientInput.value = '';
-    if (window.jQuery) $('#id_client').val(null).trigger('change');
-  }
-
-  if (accessLevel === 'restricted') {
-    allowedUsersGroup.style.display = 'block';
-    allowedUsersInput.required = true;
-    if (window.jQuery) $('#id_allowed_users').prop('required', true);
-  } else {
-    allowedUsersGroup.style.display = 'none';
-    allowedUsersInput.required = false;
-    if (window.jQuery) {
-      $('#id_allowed_users').val(null).trigger('change');
-      $('#id_allowed_users').prop('required', false);
-    }
-  }
+  clientGroup.style.display = clientShared ? "flex" : "none";
+  allowedUsersGroup.style.display = restricted ? "flex" : "none";
+  if (clientInput) clientInput.required = clientShared;
 }
 
-window.addEventListener('DOMContentLoaded', function () {
-  // تفعيل Select2 فقط على حقل العميل (client)
-  if (window.jQuery) {
-    $('#id_client').select2({
-      placeholder: 'اختر العميل المرتبط...',
-      width: '100%',
-      dir: "rtl",
-      dropdownParent: $('#client-group')
-    });
-  }
-
-  toggleDynamicFields();
-  document.getElementById('id_access_level').addEventListener('change', toggleDynamicFields);
+document.addEventListener("DOMContentLoaded", function () {
+  const fileInput = document.getElementById("id_file");
+  fileInput?.addEventListener("change", function () {
+    document.getElementById("file-name").textContent =
+      fileInput.files[0]?.name ? `الملف المحدد: ${fileInput.files[0].name}` : "لم يتم اختيار أي ملف.";
+  });
+  toggleDocumentFields();
+  document.getElementById("id_access_level")?.addEventListener("change", toggleDocumentFields);
 });
 </script>
 {% endblock %}

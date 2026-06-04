@@ -2,6 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from clients.models import Client
+from core.decorators import get_user_role
 
 class Document(models.Model):
     ACCESS_CHOICES = [
@@ -13,7 +14,6 @@ class Document(models.Model):
     ]
 
     title = models.CharField(max_length=255)
-    file_url = models.URLField(max_length=1024, blank=True, null=True)
     file_path = models.CharField(max_length=512, blank=True, null=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
@@ -25,8 +25,9 @@ class Document(models.Model):
         return self.title
 
     def can_view(self, user):
-        # صلاحيات العرض
-        role = getattr(user.userprofile.role, 'name', None)
+        if not getattr(user, "is_authenticated", False):
+            return False
+        role = get_user_role(user)
         if role == 'admin':
             return True
         if self.access_level == 'public':
@@ -44,8 +45,9 @@ class Document(models.Model):
         return False
 
     def can_edit(self, user):
-        # فقط المالك أو المدير أو المستخدمين المسموح لهم بالتعديل (حسب نوع الصلاحية)
-        role = getattr(user.userprofile.role, 'name', None)
+        if not getattr(user, "is_authenticated", False):
+            return False
+        role = get_user_role(user)
         if role == 'admin':
             return True
         if self.access_level == 'private':
@@ -57,8 +59,9 @@ class Document(models.Model):
         return False
 
     def can_delete(self, user):
-        # المدير فقط أو مالك الملف في بعض الحالات
-        role = getattr(user.userprofile.role, 'name', None)
+        if not getattr(user, "is_authenticated", False):
+            return False
+        role = get_user_role(user)
         if role == 'admin':
             return True
         if self.access_level in ['private', 'restricted', 'client_shared']:

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}إعدادات النظام | مركز الملفات{% endblock %}
+
+{% block content %}
+<section class="page-shell">
+  <div class="page-heading">
+    <div class="page-heading-copy">
+      <h1>إعدادات النظام</h1>
+      <p>وصول سريع إلى إعدادات الإدارة والأمان والتقارير.</p>
+    </div>
+  </div>
+  <div class="metrics-grid">
+    <a href="{% url 'staff_list' %}" class="metric-card" style="text-decoration:none;">
+      <span class="metric-icon"><i data-lucide="users"></i></span>
+      <span class="metric-copy"><span>إدارة المستخدمين</span><strong style="font-size:1rem;">الحسابات والأدوار</strong></span>
+    </a>
+    <a href="{% url 'password_change' %}" class="metric-card" style="text-decoration:none;">
+      <span class="metric-icon"><i data-lucide="shield-check"></i></span>
+      <span class="metric-copy"><span>الأمان</span><strong style="font-size:1rem;">كلمة المرور</strong></span>
+    </a>
+    <a href="{% url 'reports' %}" class="metric-card" style="text-decoration:none;">
+      <span class="metric-icon"><i data-lucide="chart-no-axes-column-increasing"></i></span>
+      <span class="metric-copy"><span>التقارير</span><strong style="font-size:1rem;">مؤشرات النظام</strong></span>
+    </a>
+    <a href="{% url 'document_list' %}" class="metric-card" style="text-decoration:none;">
+      <span class="metric-icon"><i data-lucide="lock-keyhole"></i></span>
+      <span class="metric-copy"><span>الوصول</span><strong style="font-size:1rem;">صلاحيات المستندات</strong></span>
+    </a>
+  </div>
+</section>
+{% endblock %}

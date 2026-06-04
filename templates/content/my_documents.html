@@ -1,29 +1,32 @@
-{% extends 'base.html' %}
-{% block title %}مستنداتي{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}مستنداتي | مركز الملفات{% endblock %}
 
 {% block content %}
-<h2 class="section-title">المستندات التي قمت برفعها</h2>
-
-<div class="table-responsive">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>العنوان</th>
-                <th>الرابط</th>
-                <th>تاريخ الرفع</th>
-            </tr>
-        </thead>
+<section class="page-shell">
+  <div class="page-heading">
+    <div class="page-heading-copy">
+      <h1>مستنداتي</h1>
+      <p>المستندات التي قمت برفعها إلى النظام.</p>
+    </div>
+  </div>
+  <div class="surface">
+    <div class="table-shell">
+      <table class="app-table">
+        <thead><tr><th>المستند</th><th>تاريخ الرفع</th><th>الإجراء</th></tr></thead>
         <tbody>
-            {% for doc in documents %}
+          {% for doc in documents %}
             <tr>
-                <td>{{ doc.title }}</td>
-                <td><a href="{{ doc.file_url }}" target="_blank">عرض الملف</a></td>
-                <td>{{ doc.created_at|date:"Y-m-d H:i" }}</td>
+              <td class="cell-primary">{{ doc.title }}</td>
+              <td>{{ doc.created_at|date:"Y/m/d H:i" }}</td>
+              <td><a href="{{ doc.file_url }}" target="_blank" class="app-button small secondary">عرض الملف</a></td>
             </tr>
-            {% empty %}
-            <tr><td colspan="3">لا توجد مستندات.</td></tr>
-            {% endfor %}
+          {% empty %}
+            <tr><td colspan="3" class="empty-row">لا توجد مستندات.</td></tr>
+          {% endfor %}
         </tbody>
-    </table>
-</div>
+      </table>
+    </div>
+  </div>
+</section>
 {% endblock %}

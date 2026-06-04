@@ -1,7 +1,17 @@
 from django import forms
+from django.contrib.auth.models import User
+
 from .models import Client
 
+
 class ClientForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["assigned_to"].queryset = User.objects.filter(
+            is_active=True,
+            userprofile__role__name="staff",
+        )
+
     class Meta:
         model = Client
         fields = ['name', 'email', 'phone', 'address', 'assigned_to', 'notes']

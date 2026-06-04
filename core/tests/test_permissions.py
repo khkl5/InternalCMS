@@ -7,9 +7,9 @@ class DashboardPermissionTests(TestCase):
     def setUp(self):
         self.client = Client()
 
-        self.role_admin = Role.objects.create(name='admin')
-        self.role_staff = Role.objects.create(name='staff')
-        self.role_viewer = Role.objects.create(name='viewer')
+        self.role_admin, _ = Role.objects.get_or_create(name='admin')
+        self.role_staff, _ = Role.objects.get_or_create(name='staff')
+        self.role_viewer, _ = Role.objects.get_or_create(name='viewer')
 
         self.admin_user = User.objects.create_user(username='admin', password='adminpass')
         self.staff_user = User.objects.create_user(username='staff', password='staffpass')

@@ -17,5 +17,10 @@ class AuthTests(TestCase):
 
     def test_logout(self):
         self.client.login(username='testuser', password='testpass')
-        response = self.client.get('/logout/')
+        response = self.client.post('/logout/')
         self.assertEqual(response.status_code, 302)
+
+    def test_logout_rejects_get(self):
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.get('/logout/')
+        self.assertEqual(response.status_code, 405)

@@ -1,296 +1,162 @@
 {% extends "base.html" %}
 
-{% block title %}قائمة المهام{% endblock %}
+{% block title %}المهام | مركز الملفات{% endblock %}
 
 {% block content %}
-<div class="tasks-container">
-  <div class="tasks-card">
-    <div class="header-row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;">
-      <h2 style="margin:0;">📋 قائمة جميع المهام</h2>
-      {% if request.user.userprofile.role.name == 'admin' %}
-      <a href="{% url 'add_task' %}" class="add-task-btn">➕ إضافة مهمة جديدة</a>
-      {% endif %}
+<section class="page-shell">
+  <div class="page-heading">
+    <div class="page-heading-copy">
+      <h1>المهام</h1>
+      <p>متابعة المهام المسندة وتحديث حالتها والوصول إلى تفاصيلها.</p>
     </div>
-    <div class="table-responsive">
-      <table class="tasks-table">
+    {% if role == "admin" %}
+      <div class="page-actions">
+        <a href="{% url 'add_task' %}" class="app-button">
+          <i data-lucide="clipboard-plus"></i>
+          إضافة مهمة
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="surface">
+    <div class="surface-header">
+      <h2>قائمة المهام</h2>
+      <span class="cell-secondary">{{ all_tasks|length }} مهمة</span>
+    </div>
+    <div class="table-shell">
+      <table class="app-table">
         <thead>
           <tr>
-            <th>م</th>
-            <th>عنوان المهمة</th>
+            <th>المهمة</th>
+            <th>الموظف المسؤول</th>
             <th>تاريخ التسليم</th>
             <th>الحالة</th>
-            <th>الموظف المسؤول</th>
-            <th>الملف المرفق</th>
-            <th>تغيير الحالة</th>
-            <th>إجراءات</th>
+            <th>المرفق</th>
+            <th>تحديث الحالة</th>
+            <th>الإجراءات</th>
           </tr>
         </thead>
         <tbody>
           {% for task in all_tasks %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ task.title }}</td>
-            <td>{{ task.due_date|date:"Y-m-d"|default:"—" }}</td>
-            <td>
-              {% if task.status == 'pending' %}
-                <span class="badge badge-warning">معلقة</span>
-              {% elif task.status == 'completed' %}
-                <span class="badge badge-success">مكتملة</span>
-              {% elif task.status == 'overdue' %}
-                <span class="badge badge-danger">متأخرة</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if task.assigned_to %}
-                {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
-              {% else %}
-                —
-              {% endif %}
-            </td>
-            <td>
-              {% if task.file_url %}
-                <a href="{{ task.file_url }}" target="_blank" class="btn btn-sm btn-outline-info">📎 عرض</a>
-              {% else %}
-                <span class="text-muted">لا يوجد</span>
-              {% endif %}
-            </td>
-            <td>
-              <select class="form-select update-status" data-task-id="{{ task.id }}">
-                <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>معلقة</option>
-                <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>مكتملة</option>
-                <option value="overdue" {% if task.status == 'overdue' %}selected{% endif %}>متأخرة</option>
-              </select>
-            </td>
-            <td>
-              {% if request.user.userprofile.role.name == 'admin' %}
-                <button class="btn btn-sm btn-outline-danger delete-task-btn" data-task-id="{{ task.id }}">🗑 حذف</button>
-              {% else %}
-                <span class="text-muted">—</span>
-              {% endif %}
-            </td>
-          </tr>
+            <tr>
+              <td>
+                <div class="cell-primary">{{ task.title }}</div>
+                <div class="cell-secondary">{{ task.client.name|default:"بدون عميل" }}</div>
+              </td>
+              <td>{{ task.assigned_to.get_full_name|default:task.assigned_to.username|default:"غير مسندة" }}</td>
+              <td>{{ task.due_date|date:"Y/m/d"|default:"—" }}</td>
+              <td>
+                {% if task.status == "pending" %}
+                  <span class="status-pill status-pending">قيد التنفيذ</span>
+                {% elif task.status == "completed" %}
+                  <span class="status-pill status-completed">مكتملة</span>
+                {% else %}
+                  <span class="status-pill status-overdue">متأخرة</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if task.file_url %}
+                  <a href="{{ task.file_url }}" target="_blank" class="app-button small secondary">
+                    <i data-lucide="paperclip"></i>
+                    عرض
+                  </a>
+                {% else %}
+                  <span class="cell-secondary">لا يوجد</span>
+                {% endif %}
+              </td>
+              <td>
+                <select class="form-select update-status" data-task-id="{{ task.id }}" data-previous="{{ task.status }}">
+                  <option value="pending" {% if task.status == "pending" %}selected{% endif %}>قيد التنفيذ</option>
+                  <option value="completed" {% if task.status == "completed" %}selected{% endif %}>مكتملة</option>
+                  <option value="overdue" {% if task.status == "overdue" %}selected{% endif %}>متأخرة</option>
+                </select>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <a href="{% url 'task_detail' task.id %}" class="app-button small secondary">التفاصيل</a>
+                  {% if role == "admin" %}
+                    <button type="button" class="app-button small danger delete-task-btn" data-task-id="{{ task.id }}">
+                      <i data-lucide="trash-2"></i>
+                      حذف
+                    </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
           {% empty %}
-          <tr>
-            <td colspan="8" class="empty-row">لا توجد مهام مسجلة.</td>
-          </tr>
+            <tr><td colspan="7" class="empty-row">لا توجد مهام مسجلة.</td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
-</div>
+</section>
+{% endblock %}
 
-<!-- ✅ سكربت تغيير الحالة وحذف -->
+{% block extra_js %}
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const csrfToken = '{{ csrf_token }}';
+document.addEventListener("DOMContentLoaded", function () {
+  const csrfToken = "{{ csrf_token }}";
 
-    // ✅ تغيير حالة المهمة
-    document.querySelectorAll('.update-status').forEach(function (select) {
-      select.addEventListener('change', function () {
-        const taskId = this.dataset.taskId;
-        const newStatus = this.value;
-
-        Swal.fire({
-          title: 'تأكيد التغيير',
-          text: 'هل أنت متأكد من تغيير حالة هذه المهمة؟',
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonText: 'نعم، غيّر',
-          cancelButtonText: 'إلغاء',
-          confirmButtonColor: '#5DE6A9',
-          cancelButtonColor: '#999',
-          customClass: { popup: 'swal2-rounded' }
-        }).then((result) => {
-          if (result.isConfirmed) {
-            fetch(`/tasks/update-status/${taskId}/`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-              },
-              body: JSON.stringify({ status: newStatus })
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'تم التحديث',
-                  text: 'تم تحديث الحالة بنجاح',
-                  confirmButtonColor: '#5DE6A9',
-                  customClass: { popup: 'swal2-rounded' }
-                }).then(() => location.reload());
-              } else {
-                Swal.fire({
-                  icon: 'error',
-                  title: 'فشل التحديث',
-                  text: data.error || "خطأ غير معروف",
-                  confirmButtonColor: '#ff7675',
-                  customClass: { popup: 'swal2-rounded' }
-                });
-              }
-            })
-            .catch(err => {
-              Swal.fire({
-                icon: 'error',
-                title: 'خطأ في الاتصال',
-                text: 'حدث خطأ في الاتصال بالخادم',
-                confirmButtonColor: '#ff7675',
-                customClass: { popup: 'swal2-rounded' }
-              });
-              console.error(err);
-            });
-          }
-        });
-      });
-    });
-
-    // ✅ حذف المهمة
-    document.querySelectorAll('.delete-task-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        const taskId = this.dataset.taskId;
-        Swal.fire({
-          title: 'تأكيد الحذف',
-          text: 'هل أنت متأكد أنك تريد حذف هذه المهمة؟',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'نعم، احذف',
-          cancelButtonText: 'إلغاء',
-          confirmButtonColor: '#ff7675',
-          cancelButtonColor: '#999',
-          customClass: { popup: 'swal2-rounded' }
-        }).then((result) => {
-          if (result.isConfirmed) {
-            fetch(`/tasks/delete/${taskId}/`, {
-              method: 'POST',
-              headers: {
-                'X-CSRFToken': csrfToken
-              }
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'تم الحذف',
-                  text: 'تم حذف المهمة بنجاح',
-                  confirmButtonColor: '#5DE6A9',
-                  customClass: { popup: 'swal2-rounded' }
-                }).then(() => location.reload());
-              } else {
-                Swal.fire({
-                  icon: 'error',
-                  title: 'فشل الحذف',
-                  text: data.error || "خطأ غير معروف",
-                  confirmButtonColor: '#ff7675',
-                  customClass: { popup: 'swal2-rounded' }
-                });
-              }
-            })
-            .catch(err => {
-              Swal.fire({
-                icon: 'error',
-                title: 'خطأ في الاتصال',
-                text: 'حدث خطأ أثناء الحذف',
-                confirmButtonColor: '#ff7675',
-                customClass: { popup: 'swal2-rounded' }
-              });
-              console.error(err);
-            });
-          }
+  document.querySelectorAll(".update-status").forEach(function (select) {
+    select.addEventListener("change", function () {
+      const previous = select.dataset.previous;
+      Swal.fire({
+        title: "تأكيد التغيير",
+        text: "هل تريد تحديث حالة المهمة؟",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "تحديث",
+        cancelButtonText: "إلغاء",
+        confirmButtonColor: "#1677ff"
+      }).then(function (result) {
+        if (!result.isConfirmed) {
+          select.value = previous;
+          return;
+        }
+        fetch(`/tasks/update-status/${select.dataset.taskId}/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+          body: JSON.stringify({ status: select.value })
+        })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+          if (!data.success) throw new Error(data.error || "update failed");
+          location.reload();
+        })
+        .catch(function () {
+          select.value = previous;
+          Swal.fire({ icon: "error", title: "تعذر تحديث الحالة", confirmButtonColor: "#1677ff" });
         });
       });
     });
   });
-</script>
-{% endblock %}
 
-{% block extra_css %}
-<style>
-body {
-  background-color: #F0F4F8;
-  font-family: 'Tajawal', sans-serif;
-}
-.tasks-container {
-  display: flex;
-  justify-content: center;
-  padding-top: 80px;
-  padding-bottom: 40px;
-}
-.tasks-card {
-  background: #ffffff;
-  padding: 30px 25px;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  width: 100%;
-  max-width: 1100px;
-  color: #2F4157;
-}
-.tasks-card h2 {
-  text-align: center;
-  margin-bottom: 25px;
-  font-size: 1.4rem;
-}
-.add-task-btn {
-  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 1rem;
-  font-weight: 500;
-  box-shadow: 0 2px 8px #2ec6f32a;
-  transition: opacity 0.2s, background 0.3s;
-}
-.add-task-btn:hover {
-  opacity: 0.9;
-}
-.tasks-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.tasks-table th,
-.tasks-table td {
-  padding: 12px;
-  text-align: center;
-  border-bottom: 1px solid #e0e6ed;
-}
-.tasks-table thead {
-  background-color: #EAF7FA;
-}
-.tasks-table tbody tr:hover {
-  background-color: #f5f9fc;
-}
-.badge {
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  display: inline-block;
-}
-.badge-warning {
-  background-color: #ffeaa7;
-  color: #555;
-}
-.badge-success {
-  background-color: #55efc4;
-  color: #2d3436;
-}
-.badge-danger {
-  background-color: #ff7675;
-  color: #fff;
-}
-.empty-row {
-  text-align: center;
-  color: #777;
-  font-size: 0.95rem;
-}
-.form-select {
-  padding: 6px 10px;
-  font-size: 0.85rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-</style>
+  document.querySelectorAll(".delete-task-btn").forEach(function (button) {
+    button.addEventListener("click", function () {
+      Swal.fire({
+        title: "تأكيد الحذف",
+        text: "هل أنت متأكد من حذف هذه المهمة؟",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "نعم، احذف",
+        cancelButtonText: "إلغاء",
+        confirmButtonColor: "#d73543"
+      }).then(function (result) {
+        if (!result.isConfirmed) return;
+        fetch(`/tasks/delete/${button.dataset.taskId}/`, {
+          method: "POST",
+          headers: { "X-CSRFToken": csrfToken }
+        }).then(function (response) {
+          if (!response.ok) throw new Error("delete failed");
+          button.closest("tr").remove();
+        }).catch(function () {
+          Swal.fire({ icon: "error", title: "تعذر حذف المهمة", confirmButtonColor: "#1677ff" });
+        });
+      });
+    });
+  });
+});
+</script>
 {% endblock %}

@@ -1,105 +1,165 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>تسجيل الدخول</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal&display=swap" rel="stylesheet">
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: #F0F4F8;
-            font-family: 'Tajawal', sans-serif;
-            color: #2F4157;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .login-card {
-            background-color: #ffffff;
-            padding: 30px 25px;
-            border-radius: 20px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-card h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 1.6rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #CEDCE4;
-            border-radius: 8px;
-            font-size: 0.95rem;
-        }
-
-        button[type="submit"] {
-            background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            width: 100%;
-            transition: background 0.3s;
-        }
-
-        button[type="submit"]:hover {
-            opacity: 0.9;
-        }
-
-        .error-message {
-            color: #D8000C;
-            background-color: #FFBABA;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تسجيل الدخول | مركز الملفات</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background: #f8fafc;
+      color: #0b2142;
+      font-family: "Tajawal", Tahoma, sans-serif;
+    }
+    .login-layout {
+      display: grid;
+      min-height: 100vh;
+      grid-template-columns: minmax(330px, 38%) 1fr;
+    }
+    .login-brand {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px;
+      background: #08294f;
+      color: #fff;
+    }
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      font-size: 1.28rem;
+      font-weight: 800;
+    }
+    .brand-lockup svg { width: 38px; height: 38px; stroke-width: 1.7px; }
+    .login-brand-copy { max-width: 440px; }
+    .login-brand-copy h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.25;
+    }
+    .login-brand-copy p {
+      margin: 0;
+      color: #c6d8eb;
+      line-height: 1.9;
+    }
+    .login-brand small { color: #9fb8d2; }
+    .login-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+    }
+    .login-card {
+      width: min(100%, 460px);
+      padding: 34px;
+      border: 1px solid #dfe6ef;
+      background: #fff;
+    }
+    .login-card h2 {
+      margin: 0 0 7px;
+      font-size: 1.65rem;
+    }
+    .login-card > p {
+      margin: 0 0 27px;
+      color: #708096;
+      font-size: 0.86rem;
+    }
+    .login-field {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 17px;
+    }
+    .login-field label {
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .login-field input {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid #cbd7e5;
+      border-radius: 5px;
+      outline: none;
+      color: #0b2142;
+      font: inherit;
+    }
+    .login-field input:focus {
+      border-color: #1677ff;
+      box-shadow: 0 0 0 3px rgba(22,119,255,.11);
+    }
+    .login-button {
+      display: flex;
+      width: 100%;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin-top: 8px;
+      border: 0;
+      border-radius: 5px;
+      background: #0967e8;
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .login-button:hover { background: #075dcc; }
+    .login-button svg { width: 19px; height: 19px; }
+    .error-message {
+      margin-top: 16px;
+      padding: 11px 13px;
+      border: 1px solid #f2c5ca;
+      border-radius: 5px;
+      background: #fff1f2;
+      color: #b62431;
+      font-size: 0.78rem;
+    }
+    @media (max-width: 820px) {
+      .login-layout { display: block; }
+      .login-brand { min-height: 220px; padding: 27px; }
+      .login-brand-copy h1 { margin-top: 34px; font-size: 1.8rem; }
+      .login-brand small { display: none; }
+      .login-main { padding: 18px; }
+      .login-card { padding: 25px 20px; }
+    }
+  </style>
 </head>
 <body>
-
-<div class="login-card">
-    <h2>تسجيل الدخول</h2>
-
-    <form method="post" action="">
-        {% csrf_token %}
-        <label for="username">اسم المستخدم:</label>
-        <input type="text" id="username" name="username" required>
-
-        <label for="password">كلمة المرور:</label>
-        <input type="password" id="password" name="password" required>
-
-        <button type="submit">دخول</button>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="error-message">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    </form>
-</div>
-
+  <div class="login-layout">
+    <aside class="login-brand">
+      <div class="brand-lockup"><i data-lucide="folder"></i><span>مركز الملفات</span></div>
+      <div class="login-brand-copy">
+        <h1>ملفاتك ومهامك في مكان واحد.</h1>
+        <p>مساحة داخلية آمنة لإدارة المستندات، متابعة المهام، وتنظيم عمل الفريق.</p>
+      </div>
+      <small>نظام الإدارة الداخلية</small>
+    </aside>
+    <main class="login-main">
+      <div class="login-card">
+        <h2>تسجيل الدخول</h2>
+        <p>اختر دورك للدخول إلى مركز الملفات.</p>
+        <form method="post">
+          {% csrf_token %}
+          <div class="login-field" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 17px;">
+            <button type="submit" name="role" value="admin" class="login-button" style="margin: 0; background: #0967e8;">
+              <i data-lucide="shield"></i> مدير
+            </button>
+            <button type="submit" name="role" value="staff" class="login-button" style="margin: 0; background: #1890ff;">
+              <i data-lucide="briefcase"></i> موظف
+            </button>
+          </div>
+          {% for message in messages %}<div class="error-message">{{ message }}</div>{% endfor %}
+        </form>
+      </div>
+    </main>
+  </div>
+  <script src="https://unpkg.com/lucide@0.544.0"></script>
+  <script>lucide.createIcons();</script>
 </body>
 </html>

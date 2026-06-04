@@ -1,107 +1,43 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends "base.html" %}
+
+{% block title %}حسابي | مركز الملفات{% endblock %}
 
 {% block content %}
-<div class="profile-container">
-  <div class="profile-card">
-    <div class="profile-avatar">
-      <span>{{ request.user.first_name|first|upper }}</span>
+<section class="form-shell narrow">
+  <div class="surface">
+    <div class="profile-summary">
+      <span class="profile-avatar">{{ request.user.first_name|default:request.user.username|slice:":1"|upper }}</span>
+      <div>
+        <h2>{{ request.user.get_full_name|default:request.user.username }}</h2>
+        <p>
+          {% if role == "admin" %}مدير النظام{% elif role == "staff" %}موظف{% else %}مستخدم{% endif %}
+        </p>
+      </div>
     </div>
-    <h2>{{ request.user.get_full_name }}</h2>
-    <p class="role">{{ role }}</p>
-    <p class="phone">📞 رقم الجوال: {{ phone|default:"غير مسجل" }}</p>
-    <p class="department">🏢 القسم: {{ department|default:"غير محدد" }}</p>
-
-    <a href="{% url 'password_change' %}" class="password-btn">🔒 تغيير كلمة المرور</a>
+    <dl class="detail-grid">
+      <div class="detail-item">
+        <dt>اسم المستخدم</dt>
+        <dd>{{ request.user.username }}</dd>
+      </div>
+      <div class="detail-item">
+        <dt>البريد الإلكتروني</dt>
+        <dd>{{ request.user.email|default:"غير مسجل" }}</dd>
+      </div>
+      <div class="detail-item">
+        <dt>رقم الجوال</dt>
+        <dd>{{ phone|default:"غير مسجل" }}</dd>
+      </div>
+      <div class="detail-item">
+        <dt>القسم</dt>
+        <dd>{{ department|default:"غير محدد" }}</dd>
+      </div>
+    </dl>
+    <div class="surface-footer">
+      <a href="{% url 'password_change' %}" class="app-button">
+        <i data-lucide="key-round"></i>
+        تغيير كلمة المرور
+      </a>
+    </div>
   </div>
-</div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-body {
-  background-color: #F0F4F8;
-  font-family: 'Tajawal', sans-serif;
-}
-
-.profile-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-top: 100px;
-  padding-bottom: 40px;
-}
-
-.profile-card {
-  background: #ffffff;
-  padding: 30px 25px;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-  max-width: 400px;
-  width: 100%;
-  text-align: center;
-  color: #2F4157;
-}
-
-.profile-avatar {
-  width: 70px;
-  height: 70px;
-  margin: 0 auto 15px;
-  background: linear-gradient(135deg, #2EC6F3, #5DE6A9);
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.profile-card h2 {
-  font-size: 1.4rem;
-  margin: 10px 0 5px;
-}
-
-.role {
-  color: #8C9AA9;
-  font-size: 0.95rem;
-  margin-bottom: 10px;
-}
-
-.email {
-  font-size: 0.95rem;
-  color: #555;
-}
-
-.edit-btn {
-  display: inline-block;
-  margin-top: 15px;
-  font-size: 0.9rem;
-  text-decoration: none;
-  color: #2EC6F3;
-  transition: color 0.3s;
-}
-
-.edit-btn:hover {
-  color: #199ec2;
-}
-.password-btn {
-  display: inline-block;
-  margin-top: 10px;
-  font-size: 0.9rem;
-  text-decoration: none;
-  color: #EA5455;
-  transition: color 0.3s;
-}
-
-.password-btn:hover {
-  color: #c03a3b;
-}
-.phone, .department {
-  font-size: 0.95rem;
-  color: #555;
-  margin-top: 4px;
-}
-
-</style>
+</section>
 {% endblock %}

@@ -1,10 +1,12 @@
 {% extends "base.html" %}
-{% block title %}403 - لا تملك الصلاحية{% endblock %}
-
+{% block title %}غير مصرح | مركز الملفات{% endblock %}
 {% block content %}
-<div class="text-center mt-5">
-    <h1 class="display-4 text-danger">🚫 403</h1>
-    <p class="lead">ليس لديك صلاحية للوصول إلى هذه الصفحة.</p>
-    <a href="/" class="btn btn-primary">العودة للرئيسية</a>
-</div>
+<section class="page-shell">
+  <div class="error-page">
+    <p class="error-code">403</p>
+    <h1>ليس لديك صلاحية للوصول</h1>
+    <p>تواصل مع مدير النظام إذا كنت تعتقد أن هذه الصلاحية مطلوبة.</p>
+    <a href="{% url 'dashboard' %}" class="app-button">العودة إلى لوحة التحكم</a>
+  </div>
+</section>
 {% endblock %}

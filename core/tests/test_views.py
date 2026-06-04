@@ -7,7 +7,7 @@ class ViewTests(TestCase):
     def setUp(self):
         self.client = Client()
 
-        self.role_admin = Role.objects.create(name='admin')
+        self.role_admin, _ = Role.objects.get_or_create(name='admin')
         self.admin = User.objects.create_user(username='admin', password='adminpass')
         UserProfile.objects.create(user=self.admin, role=self.role_admin)
 

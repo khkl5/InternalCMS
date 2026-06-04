@@ -1,200 +1,78 @@
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <h2>نظام الإدارة الداخلية</h2>
-    <!-- أيقونة الإشعارات في الأعلى -->
-    <span class="sidebar-alarm">
-      <i data-lucide="bell" class="nav-icon"></i>
-    </span>
-  </div>
-  <nav>
-    {% if role == "staff" %}
-      <a href="{% url 'staff_dashboard' %}">
-        <span class="icon-bg icon-blue">
-          <i data-lucide="layout-dashboard" class="nav-icon"></i>
-        </span>
-        <span class="label">لوحة الموظف</span>
-      </a>
-    {% elif role == "admin" %}
-      <a href="{% url 'admin_dashboard' %}">
-        <span class="icon-bg icon-blue">
-          <i data-lucide="layout-dashboard" class="nav-icon"></i>
-        </span>
-        <span class="label">لوحة المدير</span>
+  <a href="{% url 'dashboard' %}" class="sidebar-brand">
+    <i data-lucide="folder"></i>
+    <span>مركز الملفات</span>
+  </a>
+
+  <nav class="sidebar-nav" aria-label="التنقل الرئيسي">
+    <a
+      href="{% url 'dashboard' %}"
+      class="{% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'staff_dashboard' %}active{% endif %}"
+    >
+      <i data-lucide="house"></i>
+      <span>لوحة التحكم</span>
+    </a>
+
+    <a
+      href="{% url 'document_list' %}"
+      class="{% if request.resolver_match.url_name == 'document_list' %}active{% endif %}"
+    >
+      <i data-lucide="file-text"></i>
+      <span>المستندات</span>
+    </a>
+
+    {% if role == "admin" or role == "staff" %}
+      <a
+        href="{% url 'upload_document' %}"
+        class="{% if request.resolver_match.url_name == 'upload_document' %}active{% endif %}"
+      >
+        <i data-lucide="cloud-upload"></i>
+        <span>رفع مستند</span>
       </a>
     {% endif %}
 
+    <a
+      href="{% url 'task_list' %}"
+      class="{% if request.resolver_match.url_name == 'task_list' or request.resolver_match.url_name == 'task_detail' or request.resolver_match.url_name == 'add_task' %}active{% endif %}"
+    >
+      <i data-lucide="clipboard-check"></i>
+      <span>المهام</span>
+    </a>
+
+    <a
+      href="{% url 'client_list' %}"
+      class="{% if request.resolver_match.url_name == 'client_list' or request.resolver_match.url_name == 'client_tasks' %}active{% endif %}"
+    >
+      <i data-lucide="users-round"></i>
+      <span>العملاء</span>
+    </a>
+
     {% if role == "admin" %}
-      <a href="{% url 'add_user' %}">
-        <span class="icon-bg icon-green">
-          <i data-lucide="user-plus" class="nav-icon"></i>
-        </span>
-        <span class="label">إضافة مستخدم</span>
+      <a
+        href="{% url 'reports' %}"
+        class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}"
+      >
+        <i data-lucide="chart-no-axes-column-increasing"></i>
+        <span>التقارير</span>
       </a>
-      <a href="{% url 'staff_list' %}">
-        <span class="icon-bg icon-purple">
-          <i data-lucide="users" class="nav-icon"></i>
-        </span>
-        <span class="label">قائمة الموظفين</span>
-      </a>
-      <a href="{% url 'add_task' %}">
-        <span class="icon-bg icon-orange">
-          <i data-lucide="clipboard-plus" class="nav-icon"></i>
-        </span>
-        <span class="label">إضافة مهمة</span>
+
+      <a
+        href="{% url 'staff_list' %}"
+        class="{% if request.resolver_match.url_name == 'staff_list' or request.resolver_match.url_name == 'users' or request.resolver_match.url_name == 'add_user' or request.resolver_match.url_name == 'edit_staff' %}active{% endif %}"
+      >
+        <i data-lucide="users"></i>
+        <span>الموظفون</span>
       </a>
     {% endif %}
 
-    <a href="{% url 'client_list' %}">
-      <span class="icon-bg icon-cyan">
-        <i data-lucide="user" class="nav-icon"></i>
-      </span>
-      <span class="label">العملاء</span>
-    </a>
-    <a href="{% url 'task_list' %}">
-      <span class="icon-bg icon-yellow">
-        <i data-lucide="list-check" class="nav-icon"></i>
-      </span>
-      <span class="label">المهام</span>
-    </a>
-    {% if role == "admin" %}
-      <a href="{% url 'reports' %}">
-        <span class="icon-bg icon-pink">
-          <i data-lucide="bar-chart-3" class="nav-icon"></i>
-        </span>
-        <span class="label">التقارير</span>
-      </a>
-    {% endif %}
-    <a href="{% url 'document_list' %}">
-      <span class="icon-bg icon-blue2">
-        <i data-lucide="file-text" class="nav-icon"></i>
-      </span>
-      <span class="label">المستندات</span>
-    </a>
-    <hr />
-    <a href="{% url 'profile' %}">
-      <span class="icon-bg icon-purple">
-        <i data-lucide="user-circle" class="nav-icon"></i>
-      </span>
-      <span class="label">حسابي</span>
-    </a>
-    <a href="{% url 'logout' %}" class="logout">
-      <span class="icon-bg icon-red">
-        <i data-lucide="log-out" class="nav-icon"></i>
-      </span>
-      <span class="label">تسجيل الخروج</span>
-    </a>
+    <div class="sidebar-bottom">
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">
+          <i data-lucide="log-out"></i>
+          <span>تسجيل الخروج</span>
+        </button>
+      </form>
+    </div>
   </nav>
 </aside>
-
-<!-- Lucide Icons Loader -->
-<script src="https://unpkg.com/lucide@latest"></script>
-<script>
-  lucide.createIcons();
-</script>
-
-<style>
-.sidebar {
-  position: fixed;
-  top: 50px;
-  right: 0;
-  width: 250px;
-  height: calc(100% - 50px);
-  background: linear-gradient(120deg, #1E2A38 65%, #263B50 100%);
-  color: #fff;
-  font-family: 'Tajawal', sans-serif;
-  overflow-y: auto;
-  z-index: 999;
-  box-shadow: -2px 0 10px rgba(0,0,0,0.10);
-}
-.sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 18px 20px;
-  color: #fff;
-  font-size: 1rem;
-  font-weight: bold;
-}
-.sidebar-alarm {
-  background: linear-gradient(135deg,#3bd1c6,#63c6ee);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px #63c6ee24;
-  margin-right: 10px;
-}
-.sidebar-alarm .nav-icon {
-  width: 22px;
-  height: 22px;
-  color: #fff;
-}
-.sidebar nav {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 10px;
-}
-.sidebar nav a {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  padding: 11px 12px;
-  border-radius: 15px;
-  text-decoration: none;
-  color: #fff;
-  transition: background 0.18s;
-  font-size: 1rem;
-  font-weight: 500;
-  position: relative;
-}
-.sidebar nav a:hover,
-.sidebar nav a.active {
-  background: rgba(44, 195, 243, 0.13);
-  box-shadow: 0 2px 8px #2ec6f322;
-}
-.icon-bg {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
-  min-height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 14px 0 #1ea6f233;
-  margin-left: 0;
-  margin-right: 2px;
-  transition: background 0.2s;
-}
-.nav-icon {
-  width: 22px;
-  height: 22px;
-  color: #fff;
-  stroke-width: 2.2px;
-  display: block;
-}
-.label {
-  white-space: nowrap;
-  font-size: 1.03rem;
-  letter-spacing: 0.02em;
-}
-hr {
-  border: none;
-  border-top: 1px solid rgba(255,255,255,0.11);
-  margin: 12px 0;
-}
-.logout { margin-bottom: 14px; }
-/* ألوان الدوائر */
-.icon-blue { background: linear-gradient(135deg, #2EC6F3 60%, #5DE6A9 100%); }
-.icon-green { background: linear-gradient(135deg, #42e695 30%, #3bb2b8 100%); }
-.icon-purple { background: linear-gradient(135deg, #9068be 40%, #63c6ee 100%); }
-.icon-orange { background: linear-gradient(135deg, #ff9966 40%, #ff5e62 100%); }
-.icon-cyan { background: linear-gradient(135deg, #43e97b 30%, #38f9d7 100%); }
-.icon-yellow { background: linear-gradient(135deg, #f7971e 50%, #ffd200 100%); }
-.icon-pink { background: linear-gradient(135deg, #f953c6 40%, #b91d73 100%); }
-.icon-red { background: linear-gradient(135deg, #ed213a 50%, #93291e 100%); }
-.icon-blue2 { background: linear-gradient(135deg, #4CB8C4 60%, #3CD3AD 100%); }
-</style>

@@ -1,181 +1,113 @@
-from rest_framework import viewsets, permissions
-from .models import Document
-from .serializers import DocumentSerializer
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib import messages
-from django.conf import settings
-from supabase import create_client
-import uuid, unicodedata, re
-from .forms import DocumentUploadForm
-from django.conf import settings
-from .utils import slugify_filename  # تأكد أنه موجود
 import logging
-from django.shortcuts import render
+from pathlib import Path
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Document
-from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-
-
-logger = logging.getLogger(__name__)
-
-
-# عرض قائمة المستندات
-
 from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.conf import settings
+from django.views.decorators.http import require_POST
+from rest_framework import permissions, viewsets
+
+from core.decorators import get_user_role
+from utils.supabase_client import create_signed_file_url, delete_file, upload_file
+
+from .forms import DocumentUploadForm
 from .models import Document
-from supabase import create_client
-import logging
+from .permissions import visible_documents_for
+from .serializers import DocumentSerializer
+from .utils import slugify_filename
 
 logger = logging.getLogger(__name__)
 
-supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
-# عرض قائمة المستندات مع دعم الصلاحيات
+def _attach_document_download_url(document):
+    document.file_url = create_signed_file_url(document.file_path) if document.file_path else ""
+    extension = Path(document.file_path or "").suffix.lower()
+    document.is_image = extension in {".jpg", ".jpeg", ".png", ".gif"}
+    document.is_pdf = extension == ".pdf"
+
+
 @login_required
 def document_list_view(request):
-    user = request.user
-    role = getattr(user.userprofile.role, 'name', None)
-
-    # جلب كل المستندات التي يحق للمستخدم رؤيتها (باستخدام دالة can_view)
-    all_documents = Document.objects.all()
-    documents = [doc for doc in all_documents if doc.can_view(user)]
-
-    # دعم البحث
-    query = request.GET.get('q', '')
+    role = get_user_role(request.user)
+    documents = visible_documents_for(request.user).select_related("client", "uploaded_by")
+    query = request.GET.get("q", "").strip()
     if query:
-        documents = [doc for doc in documents if query.lower() in doc.title.lower()]
+        documents = documents.filter(title__icontains=query)
 
-    # تجهيز خصائص العرض/التحميل (كما كان في الكود الأصلي)
-    for doc in documents:
-        doc.can_download = doc.can_view(user)
-        doc.can_delete = doc.can_delete(user)
-        if doc.file_url:
-            extension = doc.file_url.lower().split('.')[-1]
-            doc.is_image = extension in ['jpg', 'jpeg', 'png', 'gif']
-            doc.is_pdf = extension == 'pdf'
-        else:
-            doc.is_image = False
-            doc.is_pdf = False
+    documents = list(documents)
+    for document in documents:
+        try:
+            _attach_document_download_url(document)
+        except Exception:
+            logger.exception("Failed to create a signed URL for document %s", document.pk)
+            document.file_url = ""
+        document.can_download = document.can_view(request.user)
+        document.can_delete = document.can_delete(request.user)
 
-    return render(request, 'content/document_list.html', {
-        'documents': documents,
-        'role': role,
-        'is_admin': role == 'admin',
-        'query': query,
-    })
+    return render(
+        request,
+        "content/document_list.html",
+        {
+            "documents": documents,
+            "role": role,
+            "is_admin": role == "admin",
+            "query": query,
+        },
+    )
 
-# حذف مستند (مراعاة صلاحية الحذف)
+
+@require_POST
 @login_required
 def delete_document_view(request, document_id):
-    if request.method != "POST":
-        return JsonResponse({'success': False, 'error': 'طريقة الطلب غير مسموحة'}, status=405)
-
     document = get_object_or_404(Document, id=document_id)
-    user = request.user
+    if not document.can_delete(request.user):
+        return JsonResponse(
+            {"success": False, "error": "غير مصرح لك بحذف هذا المستند"},
+            status=403,
+        )
 
-    # التحقق من صلاحية الحذف
-    if not document.can_delete(user):
-        return JsonResponse({'success': False, 'error': 'غير مصرح لك بحذف هذا المستند'}, status=403)
+    document.delete()
+    return JsonResponse({"success": True})
 
-    try:
-        # حذف الملف من supabase إذا وجد
-        if document.file_path:
-            delete_response = supabase.storage.from_(settings.SUPABASE_STORAGE_BUCKET).remove([document.file_path])
-            if hasattr(delete_response, "error") and delete_response.error:
-                logger.error("فشل حذف الملف من Supabase: %s", delete_response.error)
-        document.delete()
-        return JsonResponse({'success': True})
-    except Exception as e:
-        logger.exception("خطأ أثناء حذف المستند: %s", e)
-        return JsonResponse({'success': False, 'error': 'حدث خطأ أثناء الحذف: {}'.format(str(e))})
 
 @login_required
 def upload_document_view(request):
-    role = getattr(request.user.userprofile.role, 'name', None)
+    role = get_user_role(request.user)
+    if role not in {"admin", "staff"}:
+        return render(request, "403.html", status=403)
 
-    # السماح فقط للمدير أو الموظف
-    if role not in ['admin', 'staff']:
-        return render(request, '403.html', status=403)
+    form = DocumentUploadForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        bucket_path = ""
+        try:
+            uploaded_file = request.FILES["file"]
+            bucket_path = f"uploads/documents/{slugify_filename(uploaded_file.name)}"
+            upload_file(uploaded_file, bucket_path)
 
-    if request.method == 'POST':
-        form = DocumentUploadForm(request.POST, request.FILES)
-
-        if form.is_valid():
-            try:
-                file = request.FILES['file']
-                safe_filename = slugify_filename(file.name)
-                bucket_path = f"uploads/documents/{safe_filename}"
-                file_bytes = file.read()
-
-                # رفع الملف إلى supabase
-                upload_response = supabase.storage.from_(settings.SUPABASE_STORAGE_BUCKET).upload(
-                    path=bucket_path,
-                    file=file_bytes,
-                    file_options={"contentType": file.content_type}
-                )
-
-                if hasattr(upload_response, "error") and upload_response.error:
-                    messages.error(request, "فشل رفع الملف إلى Supabase.")
-                    logger.error("Upload error: %s", upload_response["error"])
-                    return redirect('upload_document')
-
-                # توليد رابط تحميل موقّع
-                signed_url_response = supabase.storage.from_(settings.SUPABASE_STORAGE_BUCKET).create_signed_url(
-                    path=bucket_path,
-                    expires_in=86400  # 24 ساعة
-                )
-
-                signed_url = signed_url_response.get('signedURL')
-                if not signed_url:
-                    messages.error(request, "فشل إنشاء رابط التحميل.")
-                    logger.error("Signed URL error: %s", signed_url_response)
-                    return redirect('upload_document')
-
-                # حفظ المستند
-                document = form.save(commit=False)
-                document.uploaded_by = request.user
-                document.file_path = bucket_path
-                document.file_url = signed_url
-
-                # تحقق يدوي من العنوان (إجراء احتياطي)
-                if not document.title:
-                    messages.error(request, "العنوان مفقود.")
-                    return redirect('upload_document')
-
-                document.save()
-                form.save_m2m()
-
-                logger.info("تم حفظ المستند: %s", document)
-                messages.success(request, "تم رفع المستند بنجاح.")
-                return redirect('document_list')
-
-            except Exception as e:
-                logger.exception("خطأ أثناء رفع المستند: %s", e)
-                messages.error(request, "حدث خطأ أثناء رفع المستند. يرجى المحاولة لاحقًا.")
-
+            document = form.save(commit=False)
+            document.uploaded_by = request.user
+            document.file_path = bucket_path
+            document.save()
+            form.save_m2m()
+        except Exception:
+            logger.exception("Failed to upload a document")
+            if bucket_path:
+                try:
+                    delete_file(bucket_path)
+                except Exception:
+                    logger.exception("Failed to clean up an incomplete document upload")
+            messages.error(request, "تعذر رفع المستند. يرجى المحاولة لاحقًا.")
         else:
-            logger.warning("❌ أخطاء النموذج: %s", form.errors)
-            messages.warning(request, "الرجاء التأكد من تعبئة جميع الحقول بشكل صحيح.")
-    else:
-        form = DocumentUploadForm()
+            messages.success(request, "تم رفع المستند بنجاح.")
+            return redirect("document_list")
 
-    return render(request, 'content/upload_document.html', {'form': form})
-# API ViewSet
+    return render(request, "content/upload_document.html", {"form": form})
+
+
 class DocumentViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = DocumentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        role = getattr(user.userprofile.role, 'name', None)
-
-        if role == 'admin':
-            return Document.objects.all()
-        if role == 'staff':
-            return Document.objects.filter(uploaded_by=user)
-        return Document.objects.filter(access_level__in=['public', 'restricted'])
-
+        return visible_documents_for(self.request.user).select_related("uploaded_by", "client")
